@@ -31,25 +31,15 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//形态学处理
 	Mat morphologyImg;
-	mip->Morphology(binaryImg, &morphologyImg);
+	Mat ellElement = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
+	dilate(binaryImg, morphologyImg, ellElement);
 
 	//寻找文字区域
 	vector<RotatedRect> rects;
-	mip->FindTextRegion(morphologyImg, &rects);
+	mip->FindTextRegion(morphologyImg, &rects, 3600, 25000);
 
-	//画出轮廓
-	if (0)
-	{
-		for each (RotatedRect rect in rects)
-		{
-			Point2f P[4];
-			rect.points(P);
-			for (int j = 0; j <= 3; j++)
-			{
-				line(srcImg, P[j], P[(j + 1) % 4], Scalar(0, 255, 0), 2);
-			}
-		}
-	}
+	//画出矩形
+	mip->drawRects(&srcImg, rects, false);
 
 	//计算文本区域旋转角度
 	//cout << rects.size() << endl;
@@ -61,11 +51,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	else
 	{
-		angle = rects[0].angle;
-		if (0 < abs(angle) && abs(angle) <= 45)  //逆时针
-			angle = angle;
-		else if (45 < abs(angle) && abs(angle) < 90) //顺时针
-			angle = 90 - abs(angle);
+		angle = mip->calculateAngle(rects);
 	}
 
 	//旋转图像，得到水平文字
@@ -73,7 +59,37 @@ int _tmain(int argc, _TCHAR* argv[])
 	Mat M = getRotationMatrix2D(rects[0].center, angle, 1);
 	warpAffine(srcImg, rotatedImg, M, srcImg.size());
 
-	imshow("img", rotatedImg);
+	//阈值分割
+	Mat binaryImgRotated;
+	threshold(rotatedImg, binaryImgRotated, 180, 255, 1);
+
+	//形态学处理
+	Mat morphologyImgRotated;
+	Mat ellElement2 = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
+	dilate(binaryImgRotated, morphologyImgRotated, ellElement2);
+
+	//寻找字符区域
+	vector<RotatedRect> rectsCharRegion;
+	mip->FindTextRegion(morphologyImgRotated, &rectsCharRegion, 3600, 8000, false, true);
+
+	//画出矩形
+	mip->drawRects(&rotatedImg, rectsCharRegion, false);
+
+	//缩小字符区域
+	int topLeft_x = rectsCharRegion[0].center.x - rectsCharRegion[0].size.width / 2;
+	int topLeft_y = rectsCharRegion[0].center.y - rectsCharRegion[0].size.height / 2;
+	Rect CharRegionRect(topLeft_x, topLeft_y, rectsCharRegion[0].size.width, rectsCharRegion[0].size.height);
+	Mat reducedImg = binaryImgRotated(CharRegionRect);
+	//cout << CharRegionRect << endl;
+
+	//分割单个字符
+	vector<RotatedRect> charRects;
+	mip->FindTextRegion(reducedImg, &charRects, 30, 300, true, true);
+
+	mip->drawRects(&reducedImg, charRects, true, Scalar(127,127,127));
+
+	cv::namedWindow("result", CV_WINDOW_NORMAL);
+	imshow("result", reducedImg);
 	//imwrite("D:/实习/图片/pic/2017.08.25/C1-08251718/a1_0.bmp", DstImg);
 	waitKey(0);
 
