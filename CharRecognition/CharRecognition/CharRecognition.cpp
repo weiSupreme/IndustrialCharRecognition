@@ -1,3 +1,12 @@
+//-----------------------------------【程序说明】----------------------------------------------
+//		程序名称:：《基于opencv和C++的工业字符检测》 博文配套源码 
+//		开发所用IDE版本：Visual Studio 2013
+//		开发所用OpenCV版本：	3.4
+//		2018年8月18日 Created by zhuwei
+//		github地址：https://github.com/weiSupreme/IndustrialCharRecognition.git  
+//		博客：https://weiSupreme.github.io 
+//----------------------------------------------------------------------------------------------
+ 
 // CharRecognition.cpp : Defines the entry point for the console application.
 //
 
@@ -14,7 +23,7 @@ using namespace std;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	cout << "Industrial Character Recognition" << endl;
-	Mat srcImg = imread("D:/实习/图片/pic/2017.08.25/C1-08251718/C1_12 (2).bmp", 0);
+	Mat srcImg = imread("images/C1_12 (2).bmp", 0);
 	if (srcImg.empty())
 	{
 		std::cout << "打开图片失败,请检查" << std::endl;
