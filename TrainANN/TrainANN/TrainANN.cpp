@@ -18,7 +18,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	const int imageRows = 16;
 	const int imageCols = 8;
 	const int classSum = 10;
-	const int imagesSum = 50;
+	const int imagesSum = 54;
 	float trainingData[classSum*imagesSum][imageRows*imageCols] = { { 0 } };//每一行一个训练样本
 	float labels[classSum*imagesSum][classSum] = { { 0 } };//训练样本标签
 	Mat src, resizeImg, trainImg;
@@ -49,7 +49,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				std::cout << "can not load image \n" << std::endl;
 				return -1;
 			}
-			resize(src, resizeImg, Size(imageRows, imageCols), (0, 0), (0, 0), INTER_AREA);
+			resize(src, resizeImg, Size(imageCols, imageRows), (0, 0), (0, 0), INTER_AREA);
 			//二值化
 			threshold(resizeImg, trainImg, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
@@ -82,7 +82,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	////==========================训练部分==============================////
 	std::cout << "创建模型" << std::endl;
 	Ptr<ANN_MLP>model = ANN_MLP::create();
-	Mat layerSizes = (Mat_<int>(1, 5) << imageRows*imageCols, 128, 128, 128, classSum);
+	//Ptr<ANN_MLP> model = StatModel::load<ANN_MLP>("../bpcharModel.xml");
+	Mat layerSizes = (Mat_<int>(1, 5) << imageRows*imageCols, imageRows*imageCols, imageRows*imageCols, imageRows*imageCols, classSum);
 	model->setLayerSizes(layerSizes);
 	model->setTrainMethod(ANN_MLP::BACKPROP, 0.001, 0.1);
 	model->setActivationFunction(ANN_MLP::SIGMOID_SYM, 1.0, 1.0);

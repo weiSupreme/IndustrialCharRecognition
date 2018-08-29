@@ -24,7 +24,8 @@ using namespace std;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	cout << "Industrial Character Recognition" << endl;
-	Mat srcImg = imread("images/C1_12 (2).bmp", 0);
+	string imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_288.bmp";
+	Mat srcImg = imread(imgName, 0);
 	if (srcImg.empty())
 	{
 		std::cout << "打开图片失败,请检查" << std::endl;
@@ -90,7 +91,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	int topLeft_y = rotatedRectsCharRegion[0].center.y - rotatedRectsCharRegion[0].size.height / 2;
 	Rect CharRegionRect(topLeft_x, topLeft_y, rotatedRectsCharRegion[0].size.width, rotatedRectsCharRegion[0].size.height);
 	Mat reducedBinaryImg = binaryImgRotated(CharRegionRect);
-	//Mat reducedGrayImg = rotatedImg(CharRegionRect);
+	Mat reducedGrayImg = rotatedImg(CharRegionRect);
 	//cout << CharRegionRect << endl;
 
 	//分割单个字符
@@ -108,11 +109,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	for (int i = 0; i < rotatedRectsChar.size(); i++)
 	{
 		Mat singleCharImg = reducedBinaryImg(sortedRectsChar[i]);
-		recoStr.push_back(mip->SingleCharReco(singleCharImg, "../bpcharModel.xml"));
+		recoStr.push_back(mip->SingleCharReco(singleCharImg, "../../TrainAnn/bpcharModel.xml"));
 		cv::namedWindow("result", CV_WINDOW_NORMAL);
 		imshow("result", singleCharImg);
 		waitKey(500);
 		destroyWindow("result");
+		/*string name = "6";
+		string priorChars = "201708253621719";
+		string s(1, priorChars[i]);
+		string saveImgName = "../../TrainANN/TrainImages/" + s + "/" + name + to_string(i) + ".png";
+		cout << saveImgName << endl;
+		imwrite(saveImgName, singleCharImg);*/
 	}
 
 	cout << "识别的字符为：" << recoStr << endl;

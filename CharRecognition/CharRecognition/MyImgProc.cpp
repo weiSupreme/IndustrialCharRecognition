@@ -189,7 +189,7 @@ char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, std::string to
 	Mat_<float> srcMat(1, resizeWidth*resizeHeight);
 	for (int i = 0; i < resizeWidth*resizeHeight; i++)
 	{
-		srcMat.at<float>(0, i) = (float)dst.at<uchar>(i / 8, i % 8);
+		srcMat.at<float>(0, i) = (float)dst.at<uchar>(i / resizeWidth, i % resizeWidth);
 	}
 	
 	//使用训练好的ANN预测图像
