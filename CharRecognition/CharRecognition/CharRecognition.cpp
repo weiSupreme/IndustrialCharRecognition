@@ -24,7 +24,7 @@ using namespace std;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	cout << "Industrial Character Recognition" << endl;
-	string imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_288.bmp";
+	string imgName = "images/C1_12 (2).bmp";
 	Mat srcImg = imread(imgName, 0);
 	if (srcImg.empty())
 	{
@@ -74,6 +74,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	Mat binaryImgRotated;
 	threshold(rotatedImg, binaryImgRotated, 180, 255, 1);
 
+
 	//形态学处理
 	Mat morphologyImgRotated;
 	Mat ellElement2 = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
@@ -96,7 +97,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//分割单个字符
 	vector<RotatedRect> rotatedRectsChar;
-	mip->FindTextRegion(reducedBinaryImg, &rotatedRectsChar, 30, 300, true, true);
+	mip->FindTextRegion(reducedBinaryImg, &rotatedRectsChar, 30, 600, true, true);
 
 	mip->DrawRects(&reducedBinaryImg, rotatedRectsChar, false, Scalar(127, 127, 127));
 
@@ -106,7 +107,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//单字符识别
 	string recoStr = "";
-	for (int i = 0; i < rotatedRectsChar.size(); i++)
+	for (int i = 100; i < rotatedRectsChar.size(); i++)
 	{
 		Mat singleCharImg = reducedBinaryImg(sortedRectsChar[i]);
 		recoStr.push_back(mip->SingleCharReco(singleCharImg, "../../TrainAnn/bpcharModel.xml"));
@@ -122,11 +123,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		imwrite(saveImgName, singleCharImg);*/
 	}
 
-	cout << "识别的字符为：" << recoStr << endl;
+	//cout << "识别的字符为：" << recoStr << endl;
 
 	//cv::namedWindow("result", CV_WINDOW_NORMAL);
 	//imshow("result", reducedBinaryImg);
-	//imwrite("D:/实习/图片/pic/2017.08.25/C1-08251718/a1_0.bmp", DstImg);
 	//waitKey(0);
 
 	return 0;
