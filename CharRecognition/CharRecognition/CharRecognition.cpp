@@ -48,7 +48,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	mip->FindTextRegion(morphologyImg, &rects, 3600, 25000);
 
 	//画出矩形
-	mip->drawRects(&srcImg, rects, false);
+	mip->DrawRects(&srcImg, rects, false);
 
 	//计算文本区域旋转角度
 	//cout << rects.size() << endl;
@@ -60,7 +60,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	else
 	{
-		angle = mip->calculateAngle(rects);
+		angle = mip->CalculateAngle(rects);
 	}
 
 	//旋转图像，得到水平文字
@@ -82,23 +82,35 @@ int _tmain(int argc, _TCHAR* argv[])
 	mip->FindTextRegion(morphologyImgRotated, &rectsCharRegion, 3600, 8000, false, true);
 
 	//画出矩形
-	mip->drawRects(&rotatedImg, rectsCharRegion, false);
+	mip->DrawRects(&rotatedImg, rectsCharRegion, false);
 
 	//缩小字符区域
 	int topLeft_x = rectsCharRegion[0].center.x - rectsCharRegion[0].size.width / 2;
 	int topLeft_y = rectsCharRegion[0].center.y - rectsCharRegion[0].size.height / 2;
 	Rect CharRegionRect(topLeft_x, topLeft_y, rectsCharRegion[0].size.width, rectsCharRegion[0].size.height);
-	Mat reducedImg = binaryImgRotated(CharRegionRect);
+	Mat reducedBinaryImg = binaryImgRotated(CharRegionRect);
+	//Mat reducedGrayImg = rotatedImg(CharRegionRect);
 	//cout << CharRegionRect << endl;
 
 	//分割单个字符
 	vector<RotatedRect> charRects;
-	mip->FindTextRegion(reducedImg, &charRects, 30, 300, true, true);
+	mip->FindTextRegion(reducedBinaryImg, &charRects, 30, 300, true, true);
 
-	mip->drawRects(&reducedImg, charRects, true, Scalar(127,127,127));
+	mip->DrawRects(&reducedBinaryImg, charRects, true, Scalar(127, 127, 127));
+
+	//单字符识别
+	string recoStr = "";
+	for (int i = 0; i < charRects.size(); i++)
+	{
+		int topLeft_x = charRects[i].center.x - charRects[i].size.width / 2;
+		int topLeft_y = charRects[i].center.y - charRects[i].size.height / 2;
+		Rect CharRect(topLeft_x, topLeft_y, charRects[i].size.width, charRects[i].size.height);
+		Mat singleCharImg = reducedBinaryImg(CharRect);
+		recoStr[i] = mip->SingleCharReco(singleCharImg, "../bpcharModel.xml");
+	}
 
 	cv::namedWindow("result", CV_WINDOW_NORMAL);
-	imshow("result", reducedImg);
+	imshow("result", reducedBinaryImg);
 	//imwrite("D:/实习/图片/pic/2017.08.25/C1-08251718/a1_0.bmp", DstImg);
 	waitKey(0);
 
