@@ -14,5 +14,5 @@
 
 ### 准备数据
 &emsp;&emsp;下图是经过打光处理的易拉罐罐底图片，项目首先处理这一类的图片。					
-![原始图片](https://github.com/weiSupreme/IndustrialCharRecognition/tree/master/CharRecognition/CharRecognition/images/C1_12(2).bmp)
+![原始图片](https://github.com/weiSupreme/IndustrialCharRecognition/readmeImgs/src.png)
 
