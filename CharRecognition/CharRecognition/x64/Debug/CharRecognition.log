@@ -1,11 +1,11 @@
-﻿Build started 2018/8/29 21:16:32.
+﻿Build started 2018/8/29 21:28:06.
      1>Project "D:\github\IndustrialCharRecognition\CharRecognition\CharRecognition\CharRecognition.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Debug\CharRecognition.pch" /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt CharRecognition.cpp
          CharRecognition.cpp
-     1>CharRecognition.cpp(91): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>CharRecognition.cpp(92): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>CharRecognition.cpp(93): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>CharRecognition.cpp(94): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>CharRecognition.cpp(95): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>CharRecognition.cpp(96): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"D:\github\IndustrialCharRecognition\CharRecognition\x64\Debug\CharRecognition.exe" /INCREMENTAL /NOLOGO opencv_calib3d340d.lib opencv_core340d.lib opencv_dnn340d.lib opencv_features2d340d.lib opencv_flann340d.lib opencv_highgui340d.lib opencv_imgcodecs340d.lib opencv_imgproc340d.lib opencv_ml340d.lib opencv_objdetect340d.lib opencv_photo340d.lib opencv_shape340d.lib opencv_stitching340d.lib opencv_superres340d.lib opencv_video340d.lib opencv_videoio340d.lib opencv_videostab340d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\github\IndustrialCharRecognition\CharRecognition\x64\Debug\CharRecognition.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\github\IndustrialCharRecognition\CharRecognition\x64\Debug\CharRecognition.lib" /MACHINE:X64 x64\Debug\CharRecognition.obj
          x64\Debug\MyImgProc.obj
@@ -15,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.09
+Time Elapsed 00:00:01.54
