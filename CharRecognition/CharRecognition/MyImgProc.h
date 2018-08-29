@@ -15,7 +15,7 @@ public:
 	void SortSingleRowRects(std::vector<cv::RotatedRect> rotatedRects, cv::Rect* rect);
 
 	float CalculateAngle(std::vector<cv::RotatedRect> rect);
-	char SingleCharReco(cv::Mat src, std::string filePath, int resizeWidth = 8, int resizeHeight = 16);
+	char SingleCharReco(cv::Mat src, std::string filePath, std::string totalChar="0123456789", int resizeWidth = 8, int resizeHeight = 16);
 };
 
 #endif

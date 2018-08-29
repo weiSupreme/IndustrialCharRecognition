@@ -96,23 +96,29 @@ int _tmain(int argc, _TCHAR* argv[])
 	vector<RotatedRect> charRects;
 	mip->FindTextRegion(reducedBinaryImg, &charRects, 30, 300, true, true);
 
-	mip->DrawRects(&reducedBinaryImg, charRects, true, Scalar(127, 127, 127));
+	mip->DrawRects(&reducedBinaryImg, charRects, false, Scalar(127, 127, 127));
+
+	Rect sortedcharRects[15];
+	mip->SortMultiRowRects(charRects, sortedcharRects);
 
 	//单字符识别
-	string recoStr = "";
+	string recoStr = "201808253621718";
 	for (int i = 0; i < charRects.size(); i++)
 	{
-		int topLeft_x = charRects[i].center.x - charRects[i].size.width / 2;
-		int topLeft_y = charRects[i].center.y - charRects[i].size.height / 2;
-		Rect CharRect(topLeft_x, topLeft_y, charRects[i].size.width, charRects[i].size.height);
-		Mat singleCharImg = reducedBinaryImg(CharRect);
+		Mat singleCharImg = reducedBinaryImg(sortedcharRects[i]);
 		recoStr[i] = mip->SingleCharReco(singleCharImg, "../bpcharModel.xml");
+		cv::namedWindow("result", CV_WINDOW_NORMAL);
+		imshow("result", singleCharImg);
+		waitKey(200);
+		destroyWindow("result");
 	}
 
-	cv::namedWindow("result", CV_WINDOW_NORMAL);
-	imshow("result", reducedBinaryImg);
+	cout << "识别的字符为：" << recoStr << endl;
+
+	//cv::namedWindow("result", CV_WINDOW_NORMAL);
+	//imshow("result", reducedBinaryImg);
 	//imwrite("D:/实习/图片/pic/2017.08.25/C1-08251718/a1_0.bmp", DstImg);
-	waitKey(0);
+	//waitKey(0);
 
 	return 0;
 }

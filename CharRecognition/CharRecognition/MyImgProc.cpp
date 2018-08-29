@@ -110,26 +110,61 @@ void MyImgProc::SortMultiRowRects(std::vector<cv::RotatedRect> rotatedRects, cv:
 		center_y += rotatedRects[i].center.y;
 	}
 	center_y /= rotatedRects.size();
-	int *indexRow[2];
+	int row1Index[8], row2Index[7];
 	int row1Cnt = 0, row2Cnt = 0;
 	for (int i = 0; i < rotatedRects.size(); i++)
 	{
 		if (rotatedRects[i].center.y < center_y)
 		{
-			*(indexRow[0]++) = i;
+			row1Index[row1Cnt] = i;
 			row1Cnt++;
 		}
 		else
 		{
-			*(indexRow[1]++) = i;
+			row2Index[row2Cnt] = i;
 			row2Cnt++;
 		}
 	}
+	vector<RotatedRect> row1Rect(8), row2Rect(7);
+	for (int i =0; i <row1Cnt; i++)
+	{
+		row1Rect[i] = rotatedRects[row1Index[i]];
+	}
+	for (int i = 0; i <row2Cnt; i++)
+	{
+		row2Rect[i] = rotatedRects[row2Index[i]];
+	}
+	SortSingleRowRects(row1Rect, rect);
+	SortSingleRowRects(row2Rect, rect + row1Cnt);
 }
 
 void MyImgProc::SortSingleRowRects(std::vector<cv::RotatedRect> rotatedRects, cv::Rect* rect)
 {
-
+	int minIdx = 0, minCenter_x = rotatedRects[0].center.x;
+	vector<RotatedRect> rectTemp(1);
+	for (int j = 0; j < rotatedRects.size() - 1; j++)
+	{
+		minCenter_x = rotatedRects[j].center.x;
+		minIdx = j;
+		for (int i = j; i < rotatedRects.size(); i++)
+		{
+			if (minCenter_x>rotatedRects[i].center.x)
+			{
+				minCenter_x = rotatedRects[i].center.x;
+				minIdx = i;
+			}
+		}
+		rectTemp[0] = rotatedRects[j];
+		rotatedRects[j] = rotatedRects[minIdx];
+		rotatedRects[minIdx] = rectTemp[0];
+	}
+	for (int i = 0; i < rotatedRects.size(); i++)
+	{
+		int topLeft_x = rotatedRects[i].center.x - rotatedRects[i].size.width / 2;
+		int topLeft_y = rotatedRects[i].center.y - rotatedRects[i].size.height / 2;
+		Rect rect_(topLeft_x, topLeft_y, rotatedRects[i].size.width, rotatedRects[i].size.height);
+		*(rect++) = rect_;
+	}
 }
 
 float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rect)
@@ -142,7 +177,7 @@ float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rect)
 	return angle;
 }
 
-char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, int resizeWidth, int resizeHeight)
+char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, std::string totalChar, int resizeWidth, int resizeHeight)
 {
 	//读取模型
 	Ptr<ANN_MLP> model = StatModel::load<ANN_MLP>(filePath);
@@ -165,8 +200,5 @@ char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, int resizeWidt
 	minMaxLoc(dst, NULL, &maxVal, NULL, &maxLoc);
 	std::cout << "预测结果：" << maxLoc.x << " 置信度:" << maxVal * 100 << "%" << std::endl;
 
-	//imshow("char image", src);
-	//waitKey(1000);
-	char tmp='o';
-	return tmp;
+	return totalChar[maxLoc.x];
 }
