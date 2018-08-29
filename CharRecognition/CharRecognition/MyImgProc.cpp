@@ -32,7 +32,7 @@ void MyImgProc::Morphology(cv::Mat src, cv::Mat* dst)
 }
 
 //获取文字区域。参考自：https://blog.csdn.net/lgh0824/article/details/76100599
-void MyImgProc::FindTextRegion(cv::Mat src, std::vector<cv::RotatedRect>* rects, int areaMin, int areaMax, bool externalFlag, bool horizontalRectFlag)
+void MyImgProc::FindTextRegion(cv::Mat src, std::vector<cv::RotatedRect>* rRects, int areaMin, int areaMax, bool externalFlag, bool horizontalRectFlag)
 {
 	//1.查找轮廓
 	vector<vector<Point>> contours;
@@ -67,7 +67,7 @@ void MyImgProc::FindTextRegion(cv::Mat src, std::vector<cv::RotatedRect>* rects,
 			float center_x = rectHoriz.x + rectHoriz.width / 2;
 			float center_y = rectHoriz.y + rectHoriz.height / 2;
 			RotatedRect rect(Point2f(center_x, center_y), Size2f(rectHoriz.width, rectHoriz.height), 0);
-			rects->push_back(rect);
+			rRects->push_back(rect);
 		}
 		else
 		{
@@ -79,18 +79,18 @@ void MyImgProc::FindTextRegion(cv::Mat src, std::vector<cv::RotatedRect>* rects,
 			//int m_height = rect.boundingRect().height;
 
 			//符合条件的rect添加到rects集合中
-			rects->push_back(rect);
+			rRects->push_back(rect);
 		}
 
 	}
 	//return rects;
 }
 
-void MyImgProc::DrawRects(cv::Mat* src, std::vector<cv::RotatedRect> rects, bool showFlag, cv::Scalar color)
+void MyImgProc::DrawRects(cv::Mat* src, std::vector<cv::RotatedRect> rRects, bool showFlag, cv::Scalar color)
 {
 	if (showFlag)
 	{
-		for each (RotatedRect rect in rects)
+		for each (RotatedRect rect in rRects)
 		{
 			Point2f P[4];
 			rect.points(P);
@@ -102,19 +102,20 @@ void MyImgProc::DrawRects(cv::Mat* src, std::vector<cv::RotatedRect> rects, bool
 	}
 }
 
-void MyImgProc::SortMultiRowRects(std::vector<cv::RotatedRect> rotatedRects, cv::Rect* rect, int row)
+void MyImgProc::SortMultiRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect* rects, int row)
 {
 	int center_y = 0;
-	for (int i = 0; i < rotatedRects.size(); i++)
+	const int charNumMax = 10;
+	for (int i = 0; i < rRects.size(); i++)
 	{
-		center_y += rotatedRects[i].center.y;
+		center_y += rRects[i].center.y;
 	}
-	center_y /= rotatedRects.size();
-	int row1Index[8], row2Index[7];
+	center_y /= rRects.size();
+	int row1Index[charNumMax], row2Index[charNumMax];
 	int row1Cnt = 0, row2Cnt = 0;
-	for (int i = 0; i < rotatedRects.size(); i++)
+	for (int i = 0; i < rRects.size(); i++)
 	{
-		if (rotatedRects[i].center.y < center_y)
+		if (rRects[i].center.y < center_y)
 		{
 			row1Index[row1Cnt] = i;
 			row1Cnt++;
@@ -125,51 +126,51 @@ void MyImgProc::SortMultiRowRects(std::vector<cv::RotatedRect> rotatedRects, cv:
 			row2Cnt++;
 		}
 	}
-	vector<RotatedRect> row1Rect(8), row2Rect(7);
+	vector<RotatedRect> row1Rect(charNumMax), row2Rect(charNumMax);
 	for (int i =0; i <row1Cnt; i++)
 	{
-		row1Rect[i] = rotatedRects[row1Index[i]];
+		row1Rect[i] = rRects[row1Index[i]];
 	}
 	for (int i = 0; i <row2Cnt; i++)
 	{
-		row2Rect[i] = rotatedRects[row2Index[i]];
+		row2Rect[i] = rRects[row2Index[i]];
 	}
-	SortSingleRowRects(row1Rect, rect);
-	SortSingleRowRects(row2Rect, rect + row1Cnt);
+	SortSingleRowRects(row1Rect, rects, row1Cnt);
+	SortSingleRowRects(row2Rect, rects + row1Cnt, row2Cnt);
 }
 
-void MyImgProc::SortSingleRowRects(std::vector<cv::RotatedRect> rotatedRects, cv::Rect* rect)
+void MyImgProc::SortSingleRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect* rects, int num)
 {
-	int minIdx = 0, minCenter_x = rotatedRects[0].center.x;
+	int minIdx = 0, minCenter_x = rRects[0].center.x;
 	vector<RotatedRect> rectTemp(1);
-	for (int j = 0; j < rotatedRects.size() - 1; j++)
+	for (int j = 0; j < num - 1; j++)
 	{
-		minCenter_x = rotatedRects[j].center.x;
+		minCenter_x = rRects[j].center.x;
 		minIdx = j;
-		for (int i = j; i < rotatedRects.size(); i++)
+		for (int i = j; i < num; i++)
 		{
-			if (minCenter_x>rotatedRects[i].center.x)
+			if (minCenter_x>rRects[i].center.x)
 			{
-				minCenter_x = rotatedRects[i].center.x;
+				minCenter_x = rRects[i].center.x;
 				minIdx = i;
 			}
 		}
-		rectTemp[0] = rotatedRects[j];
-		rotatedRects[j] = rotatedRects[minIdx];
-		rotatedRects[minIdx] = rectTemp[0];
+		rectTemp[0] = rRects[j];
+		rRects[j] = rRects[minIdx];
+		rRects[minIdx] = rectTemp[0];
 	}
-	for (int i = 0; i < rotatedRects.size(); i++)
+	for (int i = 0; i < num; i++)
 	{
-		int topLeft_x = rotatedRects[i].center.x - rotatedRects[i].size.width / 2;
-		int topLeft_y = rotatedRects[i].center.y - rotatedRects[i].size.height / 2;
-		Rect rect_(topLeft_x, topLeft_y, rotatedRects[i].size.width, rotatedRects[i].size.height);
-		*(rect++) = rect_;
+		int topLeft_x = rRects[i].center.x - rRects[i].size.width / 2;
+		int topLeft_y = rRects[i].center.y - rRects[i].size.height / 2;
+		Rect rect_(topLeft_x, topLeft_y, rRects[i].size.width, rRects[i].size.height);
+		*(rects++) = rect_;
 	}
 }
 
-float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rect)
+float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rRects)
 {
-	float angle = rect[0].angle;
+	float angle = rRects[0].angle;
 	if (0 < abs(angle) && abs(angle) <= 45)  //逆时针
 		angle = angle;
 	else if (45 < abs(angle) && abs(angle) < 90) //顺时针
@@ -191,7 +192,7 @@ char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, std::string to
 		srcMat.at<float>(0, i) = (float)dst.at<uchar>(i / 8, i % 8);
 	}
 	
-	//使用训练好的MLP model预测测试图像
+	//使用训练好的ANN预测图像
 	model->predict(srcMat, dst);
 
 	//选出
