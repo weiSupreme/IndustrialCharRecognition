@@ -28,7 +28,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	cout << "Industrial Character Recognition" << endl;
 	//string imgName = "images/C1_12 (2).bmp";
-	string imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_78 (2).bmp";
+	string imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_128 (2).bmp";
 	Mat srcImg = imread(imgName, 0);
 	if (srcImg.empty())
 	{
@@ -89,23 +89,24 @@ int _tmain(int argc, _TCHAR* argv[])
 	vector<RotatedRect> rotatedRectsChar;
 	mip->FindTextRegion(morphologyImgRotated, &rotatedRectsChar, 10, 600, true, true);
 
-	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, false, Scalar(127, 127, 127));
+	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
 
-	//排序
-	Rect sortedRectsChar[15];
+	//排序和识别
+	const int charNum = 15;
+	int index[charNum];
+	float conf[charNum];
+	Rect sortedRectsChar[charNum];
 	mip->SortMultiRowRects(rotatedRectsChar, sortedRectsChar);
-	
-	//单字符识别
-	string recoStr = mip->MultiCharReco(rotatedGrayImg, sortedRectsChar, rotatedRectsChar.size(), "../../TrainAnn/bpcharModel.xml");
+	mip->MultiCharReco(rotatedGrayImg, index, conf, sortedRectsChar, rotatedRectsChar.size(), "../../TrainAnn/bpcharModel.xml");
 	
 	long t2 = GetTickCount();
 	cout << "处理时间：" << (t2 - t1 - 78) << "ms" << endl;
-	cout << "识别的字符为：" << recoStr << endl;
-	//cout << "正确的字符为：" << "2 0 1 7 0 8 2 5 3 6 2 1 7 1 8" << endl;
-
-	cv::namedWindow("result", CV_WINDOW_NORMAL);
-	imshow("result", rotatedGrayImg);
-	waitKey(0);
+	string totalChar = "0123456789";
+	for (byte i = 0; i < charNum; i++)
+	{
+		cout << "识别的字符为：" << totalChar[index[i]]<<"   ";
+		cout << "置信度为：" << conf[i] << endl;
+	}
 
 	return 0;
 }

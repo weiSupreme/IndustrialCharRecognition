@@ -9,7 +9,7 @@ MyImgProc::MyImgProc(){}
 MyImgProc::~MyImgProc(){}
 
 //增强图像中的高频区域（边缘和角点），移植自halcon emphasize函数。实现效果与halcon的区别较大
-void MyImgProc::Emphasize(cv::Mat src, cv::Mat* dst, int maskwidth, int maskheight, float factor)
+void MyImgProc::Emphasize(Mat src, Mat* dst, int maskwidth, int maskheight, float factor)
 {
 	blur(src, *dst, Size(maskwidth, maskheight));
 	subtract(src, *dst, *dst);
@@ -17,7 +17,7 @@ void MyImgProc::Emphasize(cv::Mat src, cv::Mat* dst, int maskwidth, int maskheig
 }
 
 //形态学操作
-void MyImgProc::Morphology(cv::Mat src, cv::Mat* dst)
+void MyImgProc::Morphology(Mat src, Mat* dst)
 {
 	Mat recElement = getStructuringElement(MORPH_RECT, Size(30, 9));
 	Mat ellElement = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
@@ -27,7 +27,7 @@ void MyImgProc::Morphology(cv::Mat src, cv::Mat* dst)
 }
 
 //获取文字区域。参考自：https://blog.csdn.net/lgh0824/article/details/76100599
-void MyImgProc::FindTextRegion(cv::Mat src, std::vector<cv::RotatedRect>* rRects, int areaMin, int areaMax, bool externalFlag, bool horizontalRectFlag)
+void MyImgProc::FindTextRegion(Mat src, vector<RotatedRect>* rRects, int areaMin, int areaMax, bool externalFlag, bool horizontalRectFlag)
 {
 	//1.查找轮廓
 	vector<vector<Point>> contours;
@@ -81,23 +81,28 @@ void MyImgProc::FindTextRegion(cv::Mat src, std::vector<cv::RotatedRect>* rRects
 	//return rects;
 }
 
-void MyImgProc::DrawRects(cv::Mat* src, std::vector<cv::RotatedRect> rRects, bool showFlag, cv::Scalar color)
+void MyImgProc::DrawRects(Mat* src, vector<RotatedRect> rRects, bool showFlag, cv::Scalar color)
 {
 	if (showFlag)
 	{
+		Mat image;
+		(*src).copyTo(image);
 		for each (RotatedRect rect in rRects)
 		{
 			Point2f P[4];
 			rect.points(P);
 			for (int j = 0; j <= 3; j++)
 			{
-				line(*src, P[j], P[(j + 1) % 4], color, 1);
+				line(image, P[j], P[(j + 1) % 4], color, 1);
 			}
 		}
+		cv::namedWindow("drawPicture", CV_WINDOW_NORMAL);
+		imshow("drawPicture", image);
+		waitKey(0);
 	}
 }
 
-void MyImgProc::SortMultiRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect* rects, int row)
+void MyImgProc::SortMultiRowRects(vector<RotatedRect> rRects, Rect* rects, int row)
 {
 	int center_y = 0;
 	const int charNumMax = 10;
@@ -134,7 +139,7 @@ void MyImgProc::SortMultiRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect*
 	SortSingleRowRects(row2Rect, rects + row1Cnt, row2Cnt);
 }
 
-void MyImgProc::SortSingleRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect* rects, int num)
+void MyImgProc::SortSingleRowRects(vector<RotatedRect> rRects, Rect* rects, int num)
 {
 	int minIdx = 0, minCenter_x = rRects[0].center.x;
 	vector<RotatedRect> rectTemp(1);
@@ -164,7 +169,7 @@ void MyImgProc::SortSingleRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect
 }
 
 //参考博客：https://www.cnblogs.com/willwu/p/6133696.html
-void MyImgProc::RotateImage(cv::Mat src, cv::Mat* dst, std::vector<cv::RotatedRect> rRects, float angle)
+void MyImgProc::RotateImage(Mat src, Mat* dst, vector<RotatedRect> rRects, float angle)
 {
 	cv::Point2f center(src.cols / 2, src.rows / 2);
 	cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1);
@@ -176,7 +181,7 @@ void MyImgProc::RotateImage(cv::Mat src, cv::Mat* dst, std::vector<cv::RotatedRe
 	cv::warpAffine(src, *dst, rot, bbox.size(), 1, 0, 255);
 }
 
-float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rRects)
+float MyImgProc::CalculateAngle(vector<RotatedRect> rRects)
 {
 	float angle = rRects[0].angle;
 	if (0 < abs(angle) && abs(angle) <= 45)  //逆时针
@@ -186,7 +191,7 @@ float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rRects)
 	return angle;
 }
 
-char MyImgProc::SingleCharReco(cv::Mat src, Ptr<ANN_MLP> model, std::string totalChar, int resizeWidth, int resizeHeight)
+void MyImgProc::SingleCharReco(Mat src, int* charIndex, float* confidence, Ptr<ANN_MLP> model, int resizeWidth, int resizeHeight)
 {
 	Mat dst;
 	//将测试图像转化为1*128的向量
@@ -205,19 +210,18 @@ char MyImgProc::SingleCharReco(cv::Mat src, Ptr<ANN_MLP> model, std::string tota
 	Point maxLoc;
 	minMaxLoc(dst, NULL, &maxVal, NULL, &maxLoc);
 	//cout << dst << endl;
-	std::cout << "预测结果：" << maxLoc.x << " 置信度:" << maxVal * 100 << "%" << std::endl;
-
-	return totalChar[maxLoc.x];
+	//std::cout << "预测结果：" << maxLoc.x << " 置信度:" << maxVal * 100 << "%" << std::endl;
+	*confidence = maxVal;
+	*charIndex = maxLoc.x;
 }
 
-std::string MyImgProc::MultiCharReco(cv::Mat src, cv::Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime, std::string totalChar)
+void MyImgProc::MultiCharReco(Mat src, int* charIndexs, float* confidence, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
 {
 	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>(model);
-	string str;
 	for (int i = 0; i < charNum; i++)
 	{
 		Mat singleCharImg = src(rects[i]);
-		str.push_back(SingleCharReco(singleCharImg, annModel, totalChar));
+		SingleCharReco(singleCharImg, charIndexs++, confidence++, annModel);
 		if (showSingleCharflag)
 		{
 			cv::namedWindow("result", CV_WINDOW_NORMAL);
@@ -226,5 +230,4 @@ std::string MyImgProc::MultiCharReco(cv::Mat src, cv::Rect* rects, int charNum, 
 			destroyWindow("result");
 		}
 	}
-	return str;
 }
