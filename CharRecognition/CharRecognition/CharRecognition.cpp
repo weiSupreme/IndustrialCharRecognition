@@ -17,9 +17,12 @@
 #include<opencv2/highgui/highgui.hpp>
 #include "MyImgProc.h"
 #include<string>
+#include<windows.h>
+#include <opencv2\ml.hpp>
 
 using namespace cv;
 using namespace std;
+using namespace ml;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -31,7 +34,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		std::cout << "打开图片失败,请检查" << std::endl;
 		return -1;
 	}
-	
+
+	long t1 = GetTickCount();
+
 	MyImgProc *mip = new MyImgProc();
 
 	//预处理：滤波，阈值分割
@@ -104,27 +109,26 @@ int _tmain(int argc, _TCHAR* argv[])
 	//排序
 	Rect sortedRectsChar[15];
 	mip->SortMultiRowRects(rotatedRectsChar, sortedRectsChar);
-
+	
 	//单字符识别
-	string recoStr = "";
+	string recoStr = "";	
+	//读取模型
+	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>("../../TrainAnn/bpcharModel.xml");	
 	for (int i = 0; i < rotatedRectsChar.size(); i++)
 	{
 		Mat singleCharImg = reducedGrayImg(sortedRectsChar[i]);
-		recoStr.push_back(mip->SingleCharReco(singleCharImg, "../../TrainAnn/bpcharModel.xml"));
-		cv::namedWindow("result", CV_WINDOW_NORMAL);
-		imshow("result", singleCharImg);
-		waitKey(500);
-		destroyWindow("result");
-		/*string name = "6";
-		string priorChars = "201708253621719";
-		string s(1, priorChars[i]);
-		string saveImgName = "../../TrainANN/TrainImages/" + s + "/" + name + to_string(i) + ".png";
-		cout << saveImgName << endl;
-		imwrite(saveImgName, singleCharImg);*/
+		
+		recoStr.push_back(mip->SingleCharReco(singleCharImg, annModel));
+		recoStr.push_back(' ');
+		//cv::namedWindow("result", CV_WINDOW_NORMAL);
+		//imshow("result", singleCharImg);
+		//waitKey(500);
+		//destroyWindow("result");
 	}
-
+	long t2 = GetTickCount();
+	cout << "处理时间：" << (t2 - t1 - 78) << "ms" << endl;
 	cout << "识别的字符为：" << recoStr << endl;
-	cout << "正确的字符为：" << "201708253621718";
+	cout << "正确的字符为：" << "2 0 1 7 0 8 2 5 3 6 2 1 7 1 8" << endl;
 
 	//cv::namedWindow("result", CV_WINDOW_NORMAL);
 	//imshow("result", reducedBinaryImg);

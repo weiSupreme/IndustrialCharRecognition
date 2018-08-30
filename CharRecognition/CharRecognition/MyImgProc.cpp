@@ -1,10 +1,5 @@
 #include "stdafx.h"
-#include<iostream>
-#include "opencv2/imgproc.hpp"
-#include<opencv2/core/core.hpp>
-#include<opencv2/highgui/highgui.hpp>
 #include "MyImgProc.h"
-#include <opencv2\ml.hpp>
 
 using namespace cv;
 using namespace std;
@@ -178,11 +173,8 @@ float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rRects)
 	return angle;
 }
 
-char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, std::string totalChar, int resizeWidth, int resizeHeight)
+char MyImgProc::SingleCharReco(cv::Mat src, Ptr<ANN_MLP> model, std::string totalChar, int resizeWidth, int resizeHeight)
 {
-	//读取模型
-	Ptr<ANN_MLP> model = StatModel::load<ANN_MLP>(filePath);
-
 	Mat dst;
 	//将测试图像转化为1*128的向量
 	resize(src, dst, Size(resizeWidth, resizeHeight), (0, 0), (0, 0), INTER_AREA);
@@ -199,6 +191,7 @@ char MyImgProc::SingleCharReco(cv::Mat src, std::string filePath, std::string to
 	double maxVal = 0;
 	Point maxLoc;
 	minMaxLoc(dst, NULL, &maxVal, NULL, &maxLoc);
+	//cout << dst << endl;
 	std::cout << "预测结果：" << maxLoc.x << " 置信度:" << maxVal * 100 << "%" << std::endl;
 
 	return totalChar[maxLoc.x];
