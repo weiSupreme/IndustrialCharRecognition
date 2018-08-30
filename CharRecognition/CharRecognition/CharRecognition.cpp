@@ -55,22 +55,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	//寻找文字区域
 	vector<RotatedRect> rotatedRects;
 	mip->FindTextRegion(morphologyImg, &rotatedRects, 3600, 25000);
-
-	//画出矩形
-	mip->DrawRects(&srcImg, rotatedRects, false);
-
-	//计算文本区域旋转角度
-	//cout << rects.size() << endl;
-	float angle=0.0;
 	if (rotatedRects.size() != 1)
 	{
 		cout << "找到" << rotatedRects.size() << "个文本区域" << endl;
 		return 0;
 	}
-	else
-	{
-		angle = mip->CalculateAngle(rotatedRects);
-	}
+
+	//画出矩形
+	mip->DrawRects(&srcImg, rotatedRects, false);
+
+	//计算文本区域旋转角度
+	float angle=0.0;
+	angle = mip->CalculateAngle(rotatedRects);
 
 	//获取水平矩形
 	Rect horizontalRect = rotatedRects[0].boundingRect();
@@ -100,20 +96,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	mip->SortMultiRowRects(rotatedRectsChar, sortedRectsChar);
 	
 	//单字符识别
-	string recoStr = "";	
-	//读取模型
-	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>("../../TrainAnn/bpcharModel.xml");	
-	for (int i = 0; i < rotatedRectsChar.size(); i++)
-	{
-		Mat singleCharImg = rotatedGrayImg(sortedRectsChar[i]);
-		
-		recoStr.push_back(mip->SingleCharReco(singleCharImg, annModel));
-		recoStr.push_back(' ');
-		//cv::namedWindow("result", CV_WINDOW_NORMAL);
-		//imshow("result", singleCharImg);
-		//waitKey(0);
-		//destroyWindow("result");
-	}
+	string recoStr = mip->MultiCharReco(rotatedGrayImg, sortedRectsChar, rotatedRectsChar.size(), "../../TrainAnn/bpcharModel.xml");
+	
 	long t2 = GetTickCount();
 	cout << "处理时间：" << (t2 - t1 - 78) << "ms" << endl;
 	cout << "识别的字符为：" << recoStr << endl;

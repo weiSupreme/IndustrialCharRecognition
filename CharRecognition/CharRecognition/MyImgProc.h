@@ -26,6 +26,7 @@ public:
 
 	float CalculateAngle(std::vector<cv::RotatedRect> rRects);
 	char SingleCharReco(cv::Mat src, cv::Ptr<cv::ml::ANN_MLP> model, std::string totalChar = "0123456789", int resizeWidth = 8, int resizeHeight = 16);
+	std::string MultiCharReco(cv::Mat src, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800, std::string totalChar = "0123456789");
 };
 
 #endif

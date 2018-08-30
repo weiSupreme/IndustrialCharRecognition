@@ -209,3 +209,22 @@ char MyImgProc::SingleCharReco(cv::Mat src, Ptr<ANN_MLP> model, std::string tota
 
 	return totalChar[maxLoc.x];
 }
+
+std::string MyImgProc::MultiCharReco(cv::Mat src, cv::Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime, std::string totalChar)
+{
+	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>(model);
+	string str;
+	for (int i = 0; i < charNum; i++)
+	{
+		Mat singleCharImg = src(rects[i]);
+		str.push_back(SingleCharReco(singleCharImg, annModel, totalChar));
+		if (showSingleCharflag)
+		{
+			cv::namedWindow("result", CV_WINDOW_NORMAL);
+			imshow("result", singleCharImg);
+			waitKey(waitTime);
+			destroyWindow("result");
+		}
+	}
+	return str;
+}
