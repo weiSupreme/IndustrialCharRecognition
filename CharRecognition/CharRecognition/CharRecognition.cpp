@@ -26,13 +26,36 @@ using namespace ml;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	cout << "Industrial Character Recognition" << endl;
-	//string imgName = "images/C1_12 (2).bmp";
-	string imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_128 (2).bmp";
+	cout << "*********Industrial Character Recognition********" << endl;
+	cout << "测试程序自带图片，请输入 0 " << endl;
+	cout << "选择其他测试图片， 请输入 1" << endl;
+	char chKeyB=0;
+	while (!chKeyB)
+	{
+		cin >> chKeyB;
+	}
+	string imgName;
+	if (chKeyB == '0')
+	{
+		imgName = "images/C1_128 (2).bmp";
+		//imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_128 (2).bmp";
+		cout << "图片路径为： " << imgName << endl;
+	}
+	else if (chKeyB == '1')
+	{
+		cout << "请输入图片路径："<< endl;
+		cin >> imgName;
+		cout << "图片路径为： " << imgName << endl;
+	}
+	else
+	{
+		cout << "请选择正确的操作" << endl;
+	}
+	
 	Mat srcImg = imread(imgName, 0);
 	if (srcImg.empty())
 	{
-		std::cout << "打开图片失败,请检查。图片存放在 ‘IndustrialCharRecognition\CharRecognition\CharRecognition\images’ " << std::endl;
+		std::cout << "打开图片失败，请检查" << std::endl;
 		return -1;
 	}
 
@@ -89,8 +112,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	vector<RotatedRect> rotatedRectsChar;
 	mip->FindTextRegion(morphologyImgRotated, &rotatedRectsChar, 10, 600, true, true);
 
-	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
-
 	//排序和识别
 	const int charNum = 15;
 	int index[charNum];
@@ -107,6 +128,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		cout << "识别的字符为：" << totalChar[index[i]]<<"   ";
 		cout << "置信度为：" << conf[i] << endl;
 	}
+
+	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
 
 	return 0;
 }
