@@ -18,7 +18,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	const int imageRows = 16;
 	const int imageCols = 8;
 	const int classSum = 10;
-	const int imagesSum = 54;
+	const int imagesSum = 100;
 	float trainingData[classSum*imagesSum][imageRows*imageCols] = { { 0 } };//每一行一个训练样本
 	float labels[classSum*imagesSum][classSum] = { { 0 } };//训练样本标签
 	Mat src, resizeImg, trainImg;
@@ -26,7 +26,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for (int i = 0; i < classSum; i++)
 	{
 		//目标文件夹路径
-		std::string inPath = "../charSamples/";
+		std::string inPath = "D:/实习/seg/TrainImages/";
 		char temp[256];
 		int k = 0;
 		sprintf_s(temp, "%d", i);
@@ -41,7 +41,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		do
 		{
 			//找到的文件的文件名
-			std::string imgname = "../charSamples/";
+			std::string imgname = "D:/实习/seg/TrainImages/";
 			imgname = imgname + temp + "/" + fileinfo.name;
 			src = imread(imgname, 0);
 			if (src.empty())
@@ -51,7 +51,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			resize(src, resizeImg, Size(imageCols, imageRows), (0, 0), (0, 0), INTER_AREA);
 			//二值化
-			threshold(resizeImg, trainImg, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+			//threshold(resizeImg, trainImg, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
 			//imshow("image", trainImg);
 			//waitKey(5);
@@ -83,7 +83,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::cout << "创建模型" << std::endl;
 	Ptr<ANN_MLP>model = ANN_MLP::create();
 	//Ptr<ANN_MLP> model = StatModel::load<ANN_MLP>("../bpcharModel.xml");
-	Mat layerSizes = (Mat_<int>(1, 5) << imageRows*imageCols, imageRows*imageCols, imageRows*imageCols, imageRows*imageCols, classSum);
+	Mat layerSizes = (Mat_<int>(1, 5) << imageRows*imageCols, 256, 256, 256, classSum);
 	model->setLayerSizes(layerSizes);
 	model->setTrainMethod(ANN_MLP::BACKPROP, 0.001, 0.1);
 	model->setActivationFunction(ANN_MLP::SIGMOID_SYM, 1.0, 1.0);

@@ -107,9 +107,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//单字符识别
 	string recoStr = "";
-	for (int i = 100; i < rotatedRectsChar.size(); i++)
+	for (int i = 0; i < rotatedRectsChar.size(); i++)
 	{
-		Mat singleCharImg = reducedBinaryImg(sortedRectsChar[i]);
+		Mat singleCharImg = reducedGrayImg(sortedRectsChar[i]);
 		recoStr.push_back(mip->SingleCharReco(singleCharImg, "../../TrainAnn/bpcharModel.xml"));
 		cv::namedWindow("result", CV_WINDOW_NORMAL);
 		imshow("result", singleCharImg);
@@ -123,7 +123,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		imwrite(saveImgName, singleCharImg);*/
 	}
 
-	//cout << "识别的字符为：" << recoStr << endl;
+	cout << "识别的字符为：" << recoStr << endl;
+	cout << "正确的字符为：" << "201708253621718";
 
 	//cv::namedWindow("result", CV_WINDOW_NORMAL);
 	//imshow("result", reducedBinaryImg);
