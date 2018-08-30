@@ -27,12 +27,12 @@ using namespace ml;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	cout << "Industrial Character Recognition" << endl;
-	//string imgName = "images/C1_34 (2).bmp";
-	string imgName = "D:/ÊµÏ°/Í¼Æ¬/pic/2017.08.25/C1-08251718/C1_58 (2).bmp";
+	//string imgName = "images/C1_12 (2).bmp";
+	string imgName = "D:/ÊµÏ°/Í¼Æ¬/pic/2017.08.25/C1-08251718/C1_78 (2).bmp";
 	Mat srcImg = imread(imgName, 0);
 	if (srcImg.empty())
 	{
-		std::cout << "´ò¿ªÍ¼Æ¬Ê§°Ü,Çë¼ì²é" << std::endl;
+		std::cout << "´ò¿ªÍ¼Æ¬Ê§°Ü,Çë¼ì²é¡£Í¼Æ¬´æ·ÅÔÚ ¡®IndustrialCharRecognition\CharRecognition\CharRecognition\images¡¯ " << std::endl;
 		return -1;
 	}
 
