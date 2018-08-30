@@ -163,6 +163,19 @@ void MyImgProc::SortSingleRowRects(std::vector<cv::RotatedRect> rRects, cv::Rect
 	}
 }
 
+//²Î¿¼²©¿Í£ºhttps://www.cnblogs.com/willwu/p/6133696.html
+void MyImgProc::RotateImage(cv::Mat src, cv::Mat* dst, std::vector<cv::RotatedRect> rRects, float angle)
+{
+	cv::Point2f center(src.cols / 2, src.rows / 2);
+	cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1);
+	cv::Rect bbox = cv::RotatedRect(center, src.size(), angle).boundingRect();
+
+	rot.at<double>(0, 2) += bbox.width / 2.0 - center.x;
+	rot.at<double>(1, 2) += bbox.height / 2.0 - center.y;
+
+	cv::warpAffine(src, *dst, rot, bbox.size(), 1, 0, 255);
+}
+
 float MyImgProc::CalculateAngle(std::vector<cv::RotatedRect> rRects)
 {
 	float angle = rRects[0].angle;

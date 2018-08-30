@@ -27,7 +27,8 @@ using namespace ml;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	cout << "Industrial Character Recognition" << endl;
-	string imgName = "images/C1_12 (2).bmp";
+	//string imgName = "images/C1_34 (2).bmp";
+	string imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_58 (2).bmp";
 	Mat srcImg = imread(imgName, 0);
 	if (srcImg.empty())
 	{
@@ -41,10 +42,11 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//预处理：滤波，阈值分割
 	Mat emphasizeImg;
-	mip->Emphasize(srcImg, &emphasizeImg, 7, 7, 5);
+	//mip->Emphasize(srcImg, &emphasizeImg, 7, 7, 5);
+	medianBlur(srcImg, emphasizeImg, 3);
 	Mat binaryImg;
-	threshold(emphasizeImg, binaryImg, 190, 255, 1);
-
+	threshold(emphasizeImg, binaryImg, 200, 255, 1);
+	
 	//形态学处理
 	Mat morphologyImg;
 	Mat ellElement = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
@@ -70,41 +72,28 @@ int _tmain(int argc, _TCHAR* argv[])
 		angle = mip->CalculateAngle(rotatedRects);
 	}
 
+	//获取水平矩形
+	Rect horizontalRect = rotatedRects[0].boundingRect();
+	Mat reducedGrayImg = srcImg(horizontalRect);
+
 	//旋转图像，得到水平文字
-	Mat rotatedImg;
-	Mat M = getRotationMatrix2D(rotatedRects[0].center, angle, 1);
-	warpAffine(srcImg, rotatedImg, M, srcImg.size());
+	Mat rotatedGrayImg;
+	mip->RotateImage(reducedGrayImg, &rotatedGrayImg, rotatedRects, angle);
 
-	//阈值分割
-	Mat binaryImgRotated;
-	threshold(rotatedImg, binaryImgRotated, 180, 255, 1);
-
-
+	//阈值处理
+	Mat rotatedBinaryImg;
+	threshold(rotatedGrayImg, rotatedBinaryImg, 190, 255, 1);
+	
 	//形态学处理
 	Mat morphologyImgRotated;
-	Mat ellElement2 = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
-	dilate(binaryImgRotated, morphologyImgRotated, ellElement2);
-
-	//寻找字符区域
-	vector<RotatedRect> rotatedRectsCharRegion;
-	mip->FindTextRegion(morphologyImgRotated, &rotatedRectsCharRegion, 3600, 8000, false, true);
-
-	//画出矩形
-	mip->DrawRects(&rotatedImg, rotatedRectsCharRegion, false);
-
-	//缩小字符区域
-	int topLeft_x = rotatedRectsCharRegion[0].center.x - rotatedRectsCharRegion[0].size.width / 2;
-	int topLeft_y = rotatedRectsCharRegion[0].center.y - rotatedRectsCharRegion[0].size.height / 2;
-	Rect CharRegionRect(topLeft_x, topLeft_y, rotatedRectsCharRegion[0].size.width, rotatedRectsCharRegion[0].size.height);
-	Mat reducedBinaryImg = binaryImgRotated(CharRegionRect);
-	Mat reducedGrayImg = rotatedImg(CharRegionRect);
-	//cout << CharRegionRect << endl;
+	Mat ellElement2 = getStructuringElement(MORPH_RECT, Size(1, 2));
+	dilate(rotatedBinaryImg, morphologyImgRotated, ellElement2);
 
 	//分割单个字符
 	vector<RotatedRect> rotatedRectsChar;
-	mip->FindTextRegion(reducedBinaryImg, &rotatedRectsChar, 30, 600, true, true);
+	mip->FindTextRegion(morphologyImgRotated, &rotatedRectsChar, 10, 600, true, true);
 
-	mip->DrawRects(&reducedBinaryImg, rotatedRectsChar, false, Scalar(127, 127, 127));
+	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, false, Scalar(127, 127, 127));
 
 	//排序
 	Rect sortedRectsChar[15];
@@ -116,23 +105,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>("../../TrainAnn/bpcharModel.xml");	
 	for (int i = 0; i < rotatedRectsChar.size(); i++)
 	{
-		Mat singleCharImg = reducedGrayImg(sortedRectsChar[i]);
+		Mat singleCharImg = rotatedGrayImg(sortedRectsChar[i]);
 		
 		recoStr.push_back(mip->SingleCharReco(singleCharImg, annModel));
 		recoStr.push_back(' ');
 		//cv::namedWindow("result", CV_WINDOW_NORMAL);
 		//imshow("result", singleCharImg);
-		//waitKey(500);
+		//waitKey(0);
 		//destroyWindow("result");
 	}
 	long t2 = GetTickCount();
 	cout << "处理时间：" << (t2 - t1 - 78) << "ms" << endl;
 	cout << "识别的字符为：" << recoStr << endl;
-	cout << "正确的字符为：" << "2 0 1 7 0 8 2 5 3 6 2 1 7 1 8" << endl;
+	//cout << "正确的字符为：" << "2 0 1 7 0 8 2 5 3 6 2 1 7 1 8" << endl;
 
-	//cv::namedWindow("result", CV_WINDOW_NORMAL);
-	//imshow("result", reducedBinaryImg);
-	//waitKey(0);
+	cv::namedWindow("result", CV_WINDOW_NORMAL);
+	imshow("result", rotatedGrayImg);
+	waitKey(0);
 
 	return 0;
 }
