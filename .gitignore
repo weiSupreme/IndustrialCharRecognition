@@ -1,2 +1,11 @@
 CharRecognition/CharRecognition.sdf
 TrainANN/TrainANN.sdf
+
+
+CharRecognition/CharRecognition/x64/*
+CharRecognition/ipch/*
+CharRecognition/x64/*
+
+TrainANN/TrainANN/x64/*
+TrainANN/ipch/*
+TrainANN/x64/*
