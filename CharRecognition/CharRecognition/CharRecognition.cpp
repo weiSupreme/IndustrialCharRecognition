@@ -131,6 +131,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
 
+	cv::namedWindow("drawPicture", CV_WINDOW_NORMAL);
+	imshow("drawPicture", rotatedGrayImg);
+	//waitKey(0);
+
 	return 0;
 }
 
