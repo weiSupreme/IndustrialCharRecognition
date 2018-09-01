@@ -102,9 +102,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	Mat rotatedBinaryImg;
 	threshold(rotatedGrayImg, rotatedBinaryImg, 190, 255, 1);
 
+	//形态学处理
+	Mat morphologyImgRotated;
+	Mat ellElement2 = getStructuringElement(MORPH_RECT, Size(1, 2));
+	dilate(rotatedBinaryImg, morphologyImgRotated, ellElement2);
+
 	//分割单个字符
 	vector<RotatedRect> rotatedRectsChar;
-	mip->FindTextRegion(rotatedBinaryImg, &rotatedRectsChar, 30, 600, true, true);
+	mip->FindTextRegion(morphologyImgRotated, &rotatedRectsChar, 30, 600, true, true);
 
 	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, false, Scalar(127, 127, 127));
 
