@@ -37,8 +37,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	string imgName;
 	if (chKeyB == '0')
 	{
-		imgName = "images/C1_128 (2).bmp";
-		//imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_128 (2).bmp";
+		imgName = "images/C1_215.bmp";
+		//imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_125 (2).bmp";
 		cout << "图片路径为： " << imgName << endl;
 	}
 	else if (chKeyB == '1')
@@ -65,11 +65,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//预处理：滤波，阈值分割
 	Mat emphasizeImg;
-	//mip->Emphasize(srcImg, &emphasizeImg, 7, 7, 0.2);
 	medianBlur(srcImg, emphasizeImg, 3);
 	Mat binaryImg;
 	threshold(emphasizeImg, binaryImg, 200, 255, 1);
-	//threshold(emphasizeImg, binaryImg, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
 
 	//形态学处理
 	Mat morphologyImg;
@@ -102,17 +100,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//阈值处理
 	Mat rotatedBinaryImg;
-	//threshold(rotatedGrayImg, rotatedBinaryImg, 190, 255, 1);
-	threshold(rotatedGrayImg, rotatedBinaryImg, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
-	
-	//形态学处理
-	//Mat morphologyImgRotated;
-	//Mat ellElement2 = getStructuringElement(MORPH_RECT, Size(1, 2));
-	//dilate(rotatedBinaryImg, morphologyImgRotated, ellElement2);
+	threshold(rotatedGrayImg, rotatedBinaryImg, 190, 255, 1);
 
 	//分割单个字符
 	vector<RotatedRect> rotatedRectsChar;
-	mip->FindTextRegion(rotatedBinaryImg, &rotatedRectsChar, 50, 600, true, true);
+	mip->FindTextRegion(rotatedBinaryImg, &rotatedRectsChar, 30, 600, true, true);
+
+	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, false, Scalar(127, 127, 127));
 
 	//排序和识别
 	const int charNum = 15;
@@ -130,12 +124,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		cout << "识别的字符为：" << totalChar[index[i]]<<"   ";
 		cout << "置信度为：" << conf[i] << endl;
 	}
-
-	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
-
-	cv::namedWindow("drawPicture", CV_WINDOW_NORMAL);
-	imshow("drawPicture", rotatedBinaryImg);
-	//waitKey(0);
 
 	return 0;
 }
