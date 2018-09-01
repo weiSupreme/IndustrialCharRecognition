@@ -6,7 +6,7 @@
 
 *email: zxdzhuwei@foxmail.com(@hnu.edu.cn)*			
 
-*blog: https://weiSupreme.github.io*			
+*blog: https://52ai.site*			
 
 *2018.08.18*			
 
@@ -19,38 +19,24 @@
 
 ![待处理图片](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/src.png)
 
-### 滤波与增强			
+
 三张图片依次为：滤波结果，分割结果，形态学处理结果：				
 
 ![滤波结果](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/emphasize.png)![分割结果](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/binary.png)![形态学处理结果](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/morphalogy.png)			
 
-### 阈值分割				
 
 
-### 形态学处理			
 
-
-### 文字区域定位			
 三张图片依次为：文字区域定位结果，旋转结果，重新定位结果：				
 
 ![文字区域定位结果](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/findCharRotated.png)![旋转结果](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/rotated.png)![重新定位结果](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/findChar.png)			
 
-### 旋转			
 
-
-### 文字区域重新定位			
-
-
-### 缩小区域			
 三张图片依次为：缩小区域，单字符分割，单字符识别：				
 
 ![缩小区域](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/reduced.png)![单字符分割](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/singleChar.png)![单字符识别](https://github.com/weiSupreme/IndustrialCharRecognition/blob/master/readmeImgs/recognition.png)			
 
 
-### 单字符分割			
-
-
-### ANN识别字符				
 
 ***如果此项目对你略有帮助，请右上点击 star。谢谢！***
 

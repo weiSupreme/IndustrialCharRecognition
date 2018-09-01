@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <IncludePath>D:\opencv-3.4.0\build\install\include;D:\opencv-3.4.0\build\install\include\opencv2;D:\opencv-3.4.0\build\install\include\opencv;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\opencv-3.4.0\build\install\x64\vc12\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>opencv_calib3d340d.lib;opencv_core340d.lib;opencv_dnn340d.lib;opencv_features2d340d.lib;opencv_flann340d.lib;opencv_highgui340d.lib;opencv_imgcodecs340d.lib;opencv_imgproc340d.lib;opencv_ml340d.lib;opencv_objdetect340d.lib;opencv_photo340d.lib;opencv_shape340d.lib;opencv_stitching340d.lib;opencv_superres340d.lib;opencv_video340d.lib;opencv_videoio340d.lib;opencv_videostab340d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
