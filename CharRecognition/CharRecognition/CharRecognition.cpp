@@ -37,7 +37,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	string imgName;
 	if (chKeyB == '0')
 	{
-		imgName = "images/C1_215.bmp";
+		imgName = "images/C1_12 (2).bmp";
 		//imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_125 (2).bmp";
 		cout << "图片路径为： " << imgName << endl;
 	}
@@ -115,19 +115,34 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//排序和识别
 	const int charNum = 15;
-	int index[charNum];
-	float conf[charNum];
 	Rect sortedRectsChar[charNum];
 	mip->SortMultiRowRects(rotatedRectsChar, sortedRectsChar);
-	mip->MultiCharReco(rotatedGrayImg, index, conf, sortedRectsChar, rotatedRectsChar.size(), "../../TrainAnn/bpcharModel.xml");
-	
-	long t2 = GetTickCount();
-	cout << "处理时间：" << (t2 - t1 - 78) << "ms" << endl;
-	string totalChar = "0123456789";
-	for (byte i = 0; i < charNum; i++)
+	if (0)  //ANN
 	{
-		cout << "识别的字符为：" << totalChar[index[i]]<<"   ";
-		cout << "置信度为：" << conf[i] << endl;
+		cout << "Using ANN" << endl;
+		int index[charNum];
+		float conf[charNum];
+		mip->MultiCharRecoANN(rotatedGrayImg, index, conf, sortedRectsChar, rotatedRectsChar.size(), "../../TrainANN/ann.xml", false, 0);
+		long t2 = GetTickCount();
+		cout << "处理时间：" << (t2 - t1) << "ms" << endl;
+		string totalChar = "0123456789";
+		for (byte i = 0; i < charNum; i++)
+		{
+			cout << "识别的字符为：" << totalChar[index[i]] << "   ";
+			cout << "置信度为：" << conf[i] << endl;
+		}
+	}
+	else //SVM
+	{
+		cout << "Using SVM" << endl;
+		int results[charNum];
+		mip->MultiCharRecoSVM(rotatedGrayImg, results, sortedRectsChar, rotatedRectsChar.size(), "../../TrainSVM/svm.xml");
+		long t2 = GetTickCount();
+		cout << "处理时间：" << (t2 - t1) << "ms" << endl;
+		for (byte i = 0; i < charNum; i++)
+		{
+			cout << "识别的字符为：" << results[i] << endl;
+		}
 	}
 
 	return 0;

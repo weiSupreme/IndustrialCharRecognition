@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MyImgProc.h"
+#include<windows.h>
 
 using namespace cv;
 using namespace std;
@@ -191,7 +192,7 @@ float MyImgProc::CalculateAngle(vector<RotatedRect> rRects)
 	return angle;
 }
 
-void MyImgProc::SingleCharReco(Mat src, int* charIndex, float* confidence, Ptr<ANN_MLP> model, int resizeWidth, int resizeHeight)
+void MyImgProc::SingleCharRecoANN(Mat src, int* charIndex, float* confidence, Ptr<ANN_MLP> model, int resizeWidth, int resizeHeight)
 {
 	Mat dst;
 	//将测试图像转化为1*128的向量
@@ -215,13 +216,50 @@ void MyImgProc::SingleCharReco(Mat src, int* charIndex, float* confidence, Ptr<A
 	*charIndex = maxLoc.x;
 }
 
-void MyImgProc::MultiCharReco(Mat src, int* charIndexs, float* confidence, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
+void MyImgProc::MultiCharRecoANN(Mat src, int* charIndexs, float* confidence, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
 {
+	long t1 = GetTickCount();
 	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>(model);
+	long t2 = GetTickCount();
+	cout << "加载模型时间：" << (t2 - t1) << "ms" << endl;
 	for (int i = 0; i < charNum; i++)
 	{
 		Mat singleCharImg = src(rects[i]);
-		SingleCharReco(singleCharImg, charIndexs++, confidence++, annModel);
+		SingleCharRecoANN(singleCharImg, charIndexs++, confidence++, annModel);
+		if (showSingleCharflag)
+		{
+			cv::namedWindow("result", CV_WINDOW_NORMAL);
+			imshow("result", singleCharImg);
+			waitKey(waitTime);
+			destroyWindow("result");
+		}
+	}
+}
+
+void MyImgProc::SingleCharRecoSVM(Mat src, int* prediction, Ptr<SVM> model, int resizeWidth, int resizeHeight)
+{
+	Mat dst;
+	//将测试图像转化为1*128的向量
+	resize(src, dst, Size(resizeWidth, resizeHeight), (0, 0), (0, 0), INTER_AREA);
+	Mat p = dst.reshape(1, 1);
+	p.convertTo(p, CV_32FC1);
+
+	float response=model->predict(p);
+
+	//cout << "预测结果：" << response << endl;
+	*prediction = response;
+}
+
+void MyImgProc::MultiCharRecoSVM(Mat src, int* predictions, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
+{
+	long t1 = GetTickCount();
+	Ptr<SVM> svmModel = StatModel::load<SVM>(model);
+	long t2 = GetTickCount();
+	cout << "加载模型时间：" << (t2 - t1) << "ms" << endl;
+	for (int i = 0; i < charNum; i++)
+	{
+		Mat singleCharImg = src(rects[i]);
+		SingleCharRecoSVM(singleCharImg, predictions++, svmModel);
 		if (showSingleCharflag)
 		{
 			cv::namedWindow("result", CV_WINDOW_NORMAL);

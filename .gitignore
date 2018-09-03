@@ -1,5 +1,6 @@
 CharRecognition/CharRecognition.sdf
 TrainANN/TrainANN.sdf
+TrainSVM/TrainANN.sdf
 
 
 CharRecognition/CharRecognition/x64/*
@@ -9,3 +10,7 @@ CharRecognition/x64/*
 TrainANN/TrainANN/x64/*
 TrainANN/ipch/*
 TrainANN/x64/*
+
+TrainSVM/TrainANN/x64/*
+TrainSVM/ipch/*
+TrainSVM/x64/*

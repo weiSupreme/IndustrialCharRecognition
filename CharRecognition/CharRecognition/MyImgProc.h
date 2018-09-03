@@ -27,8 +27,11 @@ public:
 	void RotateImage(cv::Mat src, cv::Mat* dst, std::vector<cv::RotatedRect> rRects, float angle=0.0);
 	float CalculateAngle(std::vector<cv::RotatedRect> rRects);
 	
-	void SingleCharReco(cv::Mat src, int* charIndex, float* confidence, cv::Ptr<cv::ml::ANN_MLP> model, int resizeWidth = 8, int resizeHeight = 16);
-	void MultiCharReco(cv::Mat src, int* charIndexs, float* confidence, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
+	void SingleCharRecoANN(cv::Mat src, int* charIndex, float* confidence, cv::Ptr<cv::ml::ANN_MLP> model, int resizeWidth = 8, int resizeHeight = 16);
+	void MultiCharRecoANN(cv::Mat src, int* charIndexs, float* confidence, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
+
+	void SingleCharRecoSVM(cv::Mat src, int* prediction, cv::Ptr<cv::ml::SVM> model, int resizeWidth = 8, int resizeHeight = 16);
+	void MultiCharRecoSVM(cv::Mat src, int* predictions, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
 };
 
 #endif
