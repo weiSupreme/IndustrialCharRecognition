@@ -7,6 +7,7 @@
 #include<opencv2/core/core.hpp>
 #include<opencv2/highgui/highgui.hpp>
 #include <opencv2\ml.hpp>
+#include <opencv2\opencv.hpp>
 
 
 class MyImgProc
@@ -30,7 +31,7 @@ public:
 	void SingleCharRecoANN(cv::Mat src, int* charIndex, float* confidence, cv::Ptr<cv::ml::ANN_MLP> model, int resizeWidth = 8, int resizeHeight = 16);
 	void MultiCharRecoANN(cv::Mat src, int* charIndexs, float* confidence, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
 
-	void SingleCharRecoSVM(cv::Mat src, int* prediction, cv::Ptr<cv::ml::SVM> model, int resizeWidth = 8, int resizeHeight = 16);
+	void SingleCharRecoSVM(cv::Mat src, cv::Mat* sampleFeatureMat, cv::HOGDescriptor* hog, int* prediction, cv::Ptr<cv::ml::SVM> model, int resizeWidth = 16, int resizeHeight = 32);
 	void MultiCharRecoSVM(cv::Mat src, int* predictions, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
 };
 
