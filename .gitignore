@@ -1,6 +1,9 @@
 CharRecognition/CharRecognition.sdf
+CharRecognition/CharRecognition.v12.suo
 TrainANN/TrainANN.sdf
-TrainSVM/TrainANN.sdf
+TrainANN/TrainANN.v12.suo
+TrainSVM/TrainSVM.sdf
+TrainSVM/TrainSVM.v12.suo
 
 
 CharRecognition/CharRecognition/x64/*
