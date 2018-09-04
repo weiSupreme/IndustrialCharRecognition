@@ -37,7 +37,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	string imgName;
 	if (chKeyB == '0')
 	{
-		imgName = "images/C1_347.bmp";
+		imgName = "images/C1_128 (2).bmp";
 		//imgName = "D:/实习/图片/pic/2017.08.25/C1-08251718/C1_125 (2).bmp";
 		cout << "图片路径为： " << imgName << endl;
 	}
@@ -73,18 +73,20 @@ int _tmain(int argc, _TCHAR* argv[])
 	Mat morphologyImg;
 	Mat ellElement = getStructuringElement(MORPH_ELLIPSE, Size(12, 12));
 	dilate(binaryImg, morphologyImg, ellElement);
+	//至此16ms
 
 	//寻找文字区域
 	vector<RotatedRect> rotatedRects;
-	mip->FindTextRegion(morphologyImg, &rotatedRects, 3600, 25000);
+	mip->FindTextRegion(morphologyImg, rotatedRects, 3600, 25000);
 	if (rotatedRects.size() != 1)
 	{
 		cout << "找到" << rotatedRects.size() << "个文本区域" << endl;
 		return 0;
 	}
+	//至此32ms
 
 	//画出矩形
-	mip->DrawRects(&srcImg, rotatedRects, false);
+	mip->DrawRects(srcImg, rotatedRects, false);
 
 	//计算文本区域旋转角度
 	float angle=0.0;
@@ -96,7 +98,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//旋转图像，得到水平文字
 	Mat rotatedGrayImg;
-	mip->RotateImage(reducedGrayImg, &rotatedGrayImg, rotatedRects, angle);
+	mip->RotateImage(reducedGrayImg, rotatedGrayImg, angle);
 
 	//阈值处理
 	Mat rotatedBinaryImg;
@@ -109,16 +111,18 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//分割单个字符
 	vector<RotatedRect> rotatedRectsChar;
-	mip->FindTextRegion(morphologyImgRotated, &rotatedRectsChar, 30, 600, true, true);
+	mip->FindTextRegion(morphologyImgRotated, rotatedRectsChar, 30, 600, true, true);
 
-	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, false, Scalar(127, 127, 127));
+	mip->DrawRects(rotatedGrayImg, rotatedRectsChar, false, Scalar(127, 127, 127));
 
 	//排序和识别
 	const int charNum = 15;
 	Rect sortedRectsChar[charNum];
 	mip->SortMultiRowRects(rotatedRectsChar, sortedRectsChar);
+
 	long t2 = GetTickCount();
 	cout << "图像处理时间：" << (t2 - t1) << "ms" << endl;
+
 	if (0)  //ANN
 	{
 		cout << "Using ANN" << endl;
@@ -138,7 +142,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		cout << "Using SVM" << endl;
 		int results[charNum];
-		mip->MultiCharRecoSVM(rotatedGrayImg, results, sortedRectsChar, rotatedRectsChar.size(), "../../TrainSVM/svm.xml");
+		mip->MultiCharRecoSVM(rotatedGrayImg, results, sortedRectsChar, rotatedRectsChar.size(), "../../TrainSVM/svm.xml", false, 0);
 		long t3 = GetTickCount();
 		cout << "识别时间：" << (t3 - t2) << "ms" << endl;
 		for (byte i = 0; i < charNum; i++)
@@ -147,7 +151,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 
-	mip->DrawRects(&rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
+	mip->DrawRects(rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));
+	
+	//cv::namedWindow("rotatedGrayImg", CV_WINDOW_NORMAL);
+	//imshow("rotatedGrayImg", rotatedGrayImg);
+	//waitKey(0);
 
 	return 0;
 }
