@@ -16,8 +16,8 @@ using namespace std;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	////==========================读取图片创建训练数据==============================////
-	const int imageRows = 16;
-	const int imageCols = 8;
+	const int imageRows = 32;
+	const int imageCols = 16;
 	const int classSum = 10;
 
 	Mat classes;
@@ -25,13 +25,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	Mat trainingImages;
 	vector<int> trainingLabels;
 
+	Mat sampleFeatureMat;
+	//检测窗口(64,128),块尺寸(16,16),块步长(8,8),cell尺寸(8,8),直方图bin个数9
+	HOGDescriptor hog(Size(16, 32), Size(8, 8), Size(4, 4), Size(4, 4), 5);
+	sampleFeatureMat = Mat::zeros(1, 420, CV_32FC1);
+
 	Mat src, resizeImg, trainImg;
 	std::cout << "准备数据..." << std::endl;
 	for (int i = 0; i < classSum; i++)
 	{
 		//目标文件夹路径
 		//std::string inPath = "D:/实习/seg/datasets/cvSamplesDigits/";
-		std::string inPath = "D:/实习/seg/TrainImages/";
+		std::string inPath = "D:/实习/seg/TrainImagesGray/";
 		char temp[256];
 		int k = 0;
 		sprintf_s(temp, "%d", i);
@@ -47,7 +52,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			//找到的文件的文件名
 			//std::string imgname = "D:/实习/seg/datasets/cvSamplesDigits/";
-			std::string imgname = "D:/实习/seg/TrainImages/";
+			std::string imgname = "D:/实习/seg/TrainImagesGray/";
 			imgname = imgname + temp + "/" + fileinfo.name;
 			src = imread(imgname, 0);
 			if (src.empty())
@@ -57,8 +62,15 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			resize(src, resizeImg, Size(imageCols, imageRows), (0, 0), (0, 0), INTER_AREA);
 			//threshold(resizeImg, resizeImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-			resizeImg = resizeImg.reshape(1, 1);
-			trainingImages.push_back(resizeImg);
+			//resizeImg = resizeImg.reshape(1, 1);
+			//trainingImages.push_back(resizeImg);
+
+			vector<float> descriptors;//HOG描述子向量
+			hog.compute(resizeImg, descriptors, Size(4, 4));//计算HOG描述子，检测窗口移动步长(8,8)
+			for (int i = 0; i<420; i++)
+				sampleFeatureMat.at<float>(0, i) = descriptors[i];
+			trainingImages.push_back(sampleFeatureMat);
+
 			// 设置标签数据
 			trainingLabels.push_back(i);
 			k++;

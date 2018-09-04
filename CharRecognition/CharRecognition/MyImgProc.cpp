@@ -236,15 +236,20 @@ void MyImgProc::MultiCharRecoANN(Mat src, int* charIndexs, float* confidence, Re
 	}
 }
 
-void MyImgProc::SingleCharRecoSVM(Mat src, int* prediction, Ptr<SVM> model, int resizeWidth, int resizeHeight)
+void MyImgProc::SingleCharRecoSVM(Mat src, Mat* sampleFeatureMat, HOGDescriptor* hog, int* prediction, Ptr<SVM> model, int resizeWidth, int resizeHeight)
 {
 	Mat dst;
 	//将测试图像转化为1*128的向量
 	resize(src, dst, Size(resizeWidth, resizeHeight), (0, 0), (0, 0), INTER_AREA);
-	Mat p = dst.reshape(1, 1);
-	p.convertTo(p, CV_32FC1);
+	vector<float> descriptors;//HOG描述子向量
+	hog->compute(dst, descriptors, Size(4, 4));//计算HOG描述子，检测窗口移动步长(8,8)
+	for (int i = 0; i<420; i++)
+		(*sampleFeatureMat).at<float>(0, i) = descriptors[i];
 
-	float response=model->predict(p);
+	//Mat p = dst.reshape(1, 1);
+	//p.convertTo(p, CV_32FC1);
+
+	float response = model->predict(*sampleFeatureMat);
 
 	//cout << "预测结果：" << response << endl;
 	*prediction = response;
@@ -252,6 +257,11 @@ void MyImgProc::SingleCharRecoSVM(Mat src, int* prediction, Ptr<SVM> model, int 
 
 void MyImgProc::MultiCharRecoSVM(Mat src, int* predictions, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
 {
+	Mat sampleFeatureMat;
+	//检测窗口(64,128),块尺寸(16,16),块步长(8,8),cell尺寸(8,8),直方图bin个数9
+	HOGDescriptor hog(Size(16, 32), Size(8, 8), Size(4, 4), Size(4, 4), 5);
+	sampleFeatureMat = Mat::zeros(1, 420, CV_32FC1);
+
 	long t1 = GetTickCount();
 	Ptr<SVM> svmModel = StatModel::load<SVM>(model);
 	long t2 = GetTickCount();
@@ -259,7 +269,7 @@ void MyImgProc::MultiCharRecoSVM(Mat src, int* predictions, Rect* rects, int cha
 	for (int i = 0; i < charNum; i++)
 	{
 		Mat singleCharImg = src(rects[i]);
-		SingleCharRecoSVM(singleCharImg, predictions++, svmModel);
+		SingleCharRecoSVM(singleCharImg, &sampleFeatureMat, &hog, predictions++, svmModel);
 		if (showSingleCharflag)
 		{
 			cv::namedWindow("result", CV_WINDOW_NORMAL);
