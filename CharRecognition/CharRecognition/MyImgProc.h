@@ -12,8 +12,14 @@
 
 class MyImgProc
 {
+private:
+	#define CharNumMax 10
+	#define HogFeatureDim 60
+	#define CharResizeWidth 8
+	#define CharResizeHeight 16
 
 public:
+
 	MyImgProc();
 	~MyImgProc();
 
@@ -28,11 +34,11 @@ public:
 	void RotateImage(const cv::Mat &src, cv::Mat &dst, float angle=0.0);
 	float CalculateAngle(const std::vector<cv::RotatedRect> &rRects);
 	
-	void SingleCharRecoANN(const cv::Mat &src, int &charIndex, float &confidence, cv::Ptr<cv::ml::ANN_MLP> &model, int resizeWidth = 8, int resizeHeight = 16);
-	void MultiCharRecoANN(const cv::Mat &src, int* charIndexs, float* confidence, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
+	void SingleCharRecoANN(const cv::Mat &src, int &charIndex, float &confidence, cv::Ptr<cv::ml::ANN_MLP> &model, int resizeWidth = CharResizeWidth, int resizeHeight = CharResizeHeight);
+	void MultiCharRecoANN(const cv::Mat &src, int* charIndexs, float* confidences, cv::Rect* rects, int charNum, std::string modelPath, int resizeWidth = CharResizeWidth, int resizeHeight = CharResizeHeight);
 
-	void SingleCharRecoSVM(const cv::Mat &src, cv::Mat &sampleFeatureMat, cv::HOGDescriptor &hog, int &prediction, cv::Ptr<cv::ml::SVM> &model, int resizeWidth = 16, int resizeHeight = 32);
-	void MultiCharRecoSVM(const cv::Mat &src, int* predictions, cv::Rect* rects, int charNum, std::string model, bool showSingleCharflag = false, int waitTime = 800);
+	void SingleCharRecoSVM(const cv::Mat &src, cv::Mat &sampleFeatureMat, cv::HOGDescriptor &hog, int &prediction, cv::Ptr<cv::ml::SVM> &model, int resizeWidth = CharResizeWidth, int resizeHeight = CharResizeHeight);
+	void MultiCharRecoSVM(const cv::Mat &src, int* predictions, cv::Rect* rects, int charNum, std::string modelPath, int resizeWidth = CharResizeWidth, int resizeHeight = CharResizeHeight);
 };
 
 #endif

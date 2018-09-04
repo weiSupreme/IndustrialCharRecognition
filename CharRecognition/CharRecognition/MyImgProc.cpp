@@ -28,6 +28,14 @@ void MyImgProc::Morphology(const Mat &src, Mat &dst)
 }
 
 //获取文字区域。参考自：https://blog.csdn.net/lgh0824/article/details/76100599
+/*   搜索文字所在区域
+* @param src 输入图像
+* @param rRects 存储包围轮廓的带旋转矩形的向量
+* @param areaMin 轮廓面积最小值
+* @param areaMax 轮廓面积最大值
+* @param externalFlag 只寻找最外层轮廓标志位
+* @param horizontalRectFlag 只寻找水平矩形标志位
+*/
 void MyImgProc::FindTextRegion(const Mat &src, vector<RotatedRect> &rRects, int areaMin, int areaMax, bool externalFlag, bool horizontalRectFlag)
 {
 	//1.查找轮廓
@@ -82,6 +90,12 @@ void MyImgProc::FindTextRegion(const Mat &src, vector<RotatedRect> &rRects, int 
 	//return rects;
 }
 
+/*  画出包围轮廓的矩形
+* @param src 输入图像
+* @param rRects 存储了矩形的向量
+* @param showFlag 显示图像标志位
+* @param color 指示矩形颜色。例：(0,0,0)
+*/
 void MyImgProc::DrawRects(const Mat &src, vector<RotatedRect> &rRects, bool showFlag, cv::Scalar color)
 {
 	if (showFlag)
@@ -103,16 +117,21 @@ void MyImgProc::DrawRects(const Mat &src, vector<RotatedRect> &rRects, bool show
 	}
 }
 
+/* 对多行字符的包围矩形进行排序，从上至下，从左至右
+* @param rRects 输入的矩形向量
+* @param rects 输出的水平矩形向量
+* @param row 字符的行数。目前最大支持2行
+*/
 void MyImgProc::SortMultiRowRects(vector<RotatedRect> &rRects, Rect* rects, int row)
 {
 	int center_y = 0;
-	const int charNumMax = 10;
+	
 	for (int i = 0; i < (rRects).size(); i++)
 	{
 		center_y += (rRects)[i].center.y;
 	}
 	center_y /= (rRects).size();
-	int row1Index[charNumMax], row2Index[charNumMax];
+	int row1Index[CharNumMax], row2Index[CharNumMax];
 	int row1Cnt = 0, row2Cnt = 0;
 	for (int i = 0; i < (rRects).size(); i++)
 	{
@@ -127,7 +146,7 @@ void MyImgProc::SortMultiRowRects(vector<RotatedRect> &rRects, Rect* rects, int 
 			row2Cnt++;
 		}
 	}
-	vector<RotatedRect> row1Rect(charNumMax), row2Rect(charNumMax);
+	vector<RotatedRect> row1Rect(CharNumMax), row2Rect(CharNumMax);
 	for (int i =0; i <row1Cnt; i++)
 	{
 		row1Rect[i] = (rRects)[row1Index[i]];
@@ -140,6 +159,11 @@ void MyImgProc::SortMultiRowRects(vector<RotatedRect> &rRects, Rect* rects, int 
 	SortSingleRowRects(row2Rect, rects + row1Cnt, row2Cnt);
 }
 
+/* 对单行字符的包围矩形进行排序，从左至右
+* @param rRects 输入的矩形向量
+* @param rects 输出的水平矩形向量
+* @param num 字符的个数
+*/
 void MyImgProc::SortSingleRowRects(vector<RotatedRect> &rRects, Rect* rects, int num)
 {
 	int minIdx = 0, minCenter_x = rRects[0].center.x;
@@ -170,6 +194,11 @@ void MyImgProc::SortSingleRowRects(vector<RotatedRect> &rRects, Rect* rects, int
 }
 
 //参考博客：https://www.cnblogs.com/willwu/p/6133696.html
+/* 旋转图像（保留原图像所有内容）
+* @param src 输入图像
+* @param dst 输出图像
+* @param angle 旋转角度
+*/
 void MyImgProc::RotateImage(const Mat &src, Mat &dst, float angle)
 {
 	cv::Point2f center(src.cols / 2, src.rows / 2);
@@ -182,6 +211,10 @@ void MyImgProc::RotateImage(const Mat &src, Mat &dst, float angle)
 	cv::warpAffine(src, dst, rot, bbox.size(), 1, 0, 255);
 }
 
+/* 计算旋转矩形的旋转角度
+* @param rRects 输入矩形向量
+* @return 旋转角度（单位：°）
+*/
 float MyImgProc::CalculateAngle(const vector<RotatedRect> &rRects)
 {
 	float angle = rRects[0].angle;
@@ -192,6 +225,14 @@ float MyImgProc::CalculateAngle(const vector<RotatedRect> &rRects)
 	return angle;
 }
 
+/* 识别单个字符， ANN
+* @param src 含有字符的图像
+* @param charIndex 输出字符所在类别的索引
+* @param confidence 输出预测的置信度
+* @param model ANN模型
+* @param resizeWidth 图像放缩尺寸
+* @param resizeHeight 图像放缩尺寸
+*/
 void MyImgProc::SingleCharRecoANN(const Mat &src, int &charIndex, float &confidence, Ptr<ANN_MLP> &model, int resizeWidth, int resizeHeight)
 {
 	Mat dst;
@@ -216,26 +257,45 @@ void MyImgProc::SingleCharRecoANN(const Mat &src, int &charIndex, float &confide
 	charIndex = maxLoc.x;
 }
 
-void MyImgProc::MultiCharRecoANN(const Mat &src, int* charIndexs, float* confidence, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
+/* 识别多个字符， ANN
+* @param src 含有多个字符的整幅图像
+* @param charIndexs 输出字符所在类别的索引
+* @param confidences 输出预测的置信度
+* @param rRects 包围单个字符的矩形的数组
+* @param charNum 字符总个数
+* @param modelPath ANN模型所在路径
+* @param resizeWidth 图像放缩尺寸
+* @param resizeHeight 图像放缩尺寸
+*/
+void MyImgProc::MultiCharRecoANN(const Mat &src, int* charIndexs, float* confidences, Rect* rects, int charNum, string modelPath, int resizeWidth, int resizeHeight)
 {
 	long t1 = GetTickCount();
-	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>(model);
+	Ptr<ANN_MLP> annModel = StatModel::load<ANN_MLP>(modelPath);
 	long t2 = GetTickCount();
 	cout << "加载模型时间：" << (t2 - t1) << "ms" << endl;
 	for (int i = 0; i < charNum; i++)
 	{
 		Mat singleCharImg = src(rects[i]);
-		SingleCharRecoANN(singleCharImg, *charIndexs, *confidence, annModel), ++charIndexs, ++confidence;
-		if (showSingleCharflag)
+		SingleCharRecoANN(singleCharImg, *charIndexs, *confidences, annModel), ++charIndexs, ++confidences;
+		if (0)
 		{
 			cv::namedWindow("result", CV_WINDOW_NORMAL);
 			imshow("result", singleCharImg);
-			waitKey(waitTime);
+			waitKey(0);
 			destroyWindow("result");
 		}
 	}
 }
 
+/* 识别单个字符， SVM
+* @param src 含有字符的图像
+* @param sampleFeatureMat hog特征矩阵
+* @param hog hog描述子
+* @param prediction 预测字符类别
+* @param model SVM模型
+* @param resizeWidth 图像放缩尺寸
+* @param resizeHeight 图像放缩尺寸
+*/
 void MyImgProc::SingleCharRecoSVM(const Mat &src, Mat &sampleFeatureMat, HOGDescriptor &hog, int &prediction, Ptr<SVM> &model, int resizeWidth, int resizeHeight)
 {
 	Mat dst;
@@ -243,7 +303,7 @@ void MyImgProc::SingleCharRecoSVM(const Mat &src, Mat &sampleFeatureMat, HOGDesc
 	resize(src, dst, Size(resizeWidth, resizeHeight), (0, 0), (0, 0), INTER_AREA);
 	vector<float> descriptors;//HOG描述子向量
 	hog.compute(dst, descriptors, Size(4, 4));//计算HOG描述子，检测窗口移动步长(8,8)
-	for (int i = 0; i<420; i++)
+	for (int i = 0; i < HogFeatureDim; i++)
 		sampleFeatureMat.at<float>(0, i) = descriptors[i];
 
 	//Mat p = dst.reshape(1, 1);
@@ -255,26 +315,37 @@ void MyImgProc::SingleCharRecoSVM(const Mat &src, Mat &sampleFeatureMat, HOGDesc
 	prediction = response;
 }
 
-void MyImgProc::MultiCharRecoSVM(const Mat &src, int* predictions, Rect* rects, int charNum, string model, bool showSingleCharflag, int waitTime)
+/* 识别多个字符， SVM
+* @param src 含有所有字符的整幅图像
+* @param predictions 预测字符类别
+* @param rects 字符包围矩形的矩阵
+* @param charNum 字符个数
+* @param modelPath 模型所在路径
+* @param resizeWidth 图像放缩尺寸
+* @param resizeHeight 图像放缩尺寸
+*/
+void MyImgProc::MultiCharRecoSVM(const Mat &src, int* predictions, Rect* rects, int charNum, string modelPath, int resizeWidth, int resizeHeight)
 {
 	Mat sampleFeatureMat;
 	//检测窗口(64,128),块尺寸(16,16),块步长(8,8),cell尺寸(8,8),直方图bin个数9
-	HOGDescriptor hog(Size(16, 32), Size(8, 8), Size(4, 4), Size(4, 4), 5);
-	sampleFeatureMat = Mat::zeros(1, 420, CV_32FC1);
+	HOGDescriptor hog(Size(8, 16), Size(8, 8), Size(4, 4), Size(4, 4), 5);
+	sampleFeatureMat = Mat::zeros(1, HogFeatureDim, CV_32FC1);
 
 	long t1 = GetTickCount();
-	Ptr<SVM> svmModel = StatModel::load<SVM>(model);
+	Ptr<SVM> svmModel = StatModel::load<SVM>(modelPath);
 	long t2 = GetTickCount();
 	cout << "加载模型时间：" << (t2 - t1) << "ms" << endl;
 	for (int i = 0; i < charNum; i++)
 	{
 		Mat singleCharImg = src(rects[i]);
+		
 		SingleCharRecoSVM(singleCharImg, sampleFeatureMat, hog, *predictions, svmModel), ++predictions;
-		if (showSingleCharflag)
+		
+		if (0)
 		{
 			cv::namedWindow("result", CV_WINDOW_NORMAL);
 			imshow("result", singleCharImg);
-			waitKey(waitTime);
+			waitKey(0);
 			destroyWindow("result");
 		}
 	}

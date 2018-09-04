@@ -37,7 +37,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	string imgName;
 	if (chKeyB == '0')
 	{
-		imgName = "images/C1_128 (2).bmp";
+		imgName = "images/C1_215.bmp";
 		//imgName = "D:/ʵϰ/ͼƬ/pic/2017.08.25/C1-08251718/C1_125 (2).bmp";
 		cout << "ͼƬ·��Ϊ�� " << imgName << endl;
 	}

@@ -16,8 +16,8 @@ using namespace std;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	////==========================读取图片创建训练数据==============================////
-	const int imageRows = 32;
-	const int imageCols = 16;
+	const int imageRows = 16;
+	const int imageCols = 8;
 	const int classSum = 10;
 
 	Mat classes;
@@ -27,8 +27,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	Mat sampleFeatureMat;
 	//检测窗口(64,128),块尺寸(16,16),块步长(8,8),cell尺寸(8,8),直方图bin个数9
-	HOGDescriptor hog(Size(16, 32), Size(8, 8), Size(4, 4), Size(4, 4), 5);
-	sampleFeatureMat = Mat::zeros(1, 420, CV_32FC1);
+	HOGDescriptor hog(Size(8, 16), Size(8, 8), Size(4, 4), Size(4, 4), 5);
+	sampleFeatureMat = Mat::zeros(1, 60, CV_32FC1);
 
 	Mat src, resizeImg, trainImg;
 	std::cout << "准备数据..." << std::endl;
@@ -64,10 +64,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			//threshold(resizeImg, resizeImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
 			//resizeImg = resizeImg.reshape(1, 1);
 			//trainingImages.push_back(resizeImg);
-
+			//参考：https://blog.csdn.net/almost_miao/article/details/79115939
 			vector<float> descriptors;//HOG描述子向量
 			hog.compute(resizeImg, descriptors, Size(4, 4));//计算HOG描述子，检测窗口移动步长(8,8)
-			for (int i = 0; i<420; i++)
+			for (int i = 0; i<60; i++)
 				sampleFeatureMat.at<float>(0, i) = descriptors[i];
 			trainingImages.push_back(sampleFeatureMat);
 
