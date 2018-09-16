@@ -19,6 +19,7 @@
 #include<string>
 #include<windows.h>
 #include <opencv2\ml.hpp>
+//#include "CaffePredict.h"
 
 using namespace cv;
 using namespace std;
@@ -123,7 +124,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	long t2 = GetTickCount();
 	cout << "图像处理时间：" << (t2 - t1) << "ms" << endl;
 
-	if (0)  //ANN
+#define METHOD 1  // 0: ANN  1: SVM   2: caffe
+	if (0 == METHOD)  //ANN
 	{
 		cout << "Using ANN" << endl;
 		int index[charNum];
@@ -138,7 +140,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			cout << "置信度为：" << conf[i] << endl;
 		}
 	}
-	else //SVM
+	else if (1 == METHOD) //SVM
 	{
 		cout << "Using SVM" << endl;
 		int results[charNum];
@@ -149,6 +151,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			cout << "识别的字符为：" << results[i] << endl;
 		}
+	}
+	else
+	{
+		string model_file = "D:/win-ssd/caffe-ssd-ms/examples/mnist/lenet_fc.prototxt";
+		string weights = "D:/win-ssd/caffe-ssd-ms/examples/mnist/model/lenet_iter_2000.caffemodel";
+		int gpu_id = -1;
+		//CaffePredict predictor(model_file, weights, gpu_id);
 	}
 
 	mip->DrawRects(rotatedGrayImg, rotatedRectsChar, true, Scalar(127, 127, 127));

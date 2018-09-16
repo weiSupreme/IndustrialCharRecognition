@@ -31,3 +31,12 @@ TestANNBatch/TestANNBatch.v12.suo
 TestANNBatch/TestANNBatch/x64/*
 TestANNBatch/ipch/*
 TestANNBatch/x64/*
+
+CaffeTemplate/CaffeTemplate.sdf
+CaffeTemplate/CaffeTemplate.v12.suo
+CaffeTemplate/CaffeTemplate/x64/*
+CaffeTemplate/ipch/*
+CaffeTemplate/x64/*
+CaffeTemplate/CaffeDependencies/*
+
+CaffeTemplate-backup/*

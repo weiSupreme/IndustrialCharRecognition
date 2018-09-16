@@ -60,7 +60,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			int prediction;
 			SingleCharRecoSVM(src, sampleFeatureMat, hog, prediction, svmModel, 8, 16);
 			long t2 = GetTickCount();
-			timeall += (t2 - t1);
+			timeall += (t2 - t1) * 10;
 			if (i == prediction)
 				++right;
 			++total;
@@ -71,7 +71,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << "总共测试字符数： " << total << endl;
 	cout << "正确字符数： " << right << endl;
 	cout << "准确率为： " << right * 100 / total << endl;
-	cout << "平均用时为： " << timeall / total << " ms" << endl;
+	cout << "平均用时为： " << timeall / total << " *100 us" << endl;
 	return 0;
 }
 

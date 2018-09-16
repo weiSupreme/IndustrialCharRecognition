@@ -26,7 +26,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	for (int i = 0; i < classSum; i++)
 	{
 		//目标文件夹路径
-		std::string inPath = "D:/实习/seg/TrainImages/";
+		std::string inPath = "D:/实习/seg/TrainImagesGray/";
 		char temp[256];
 		int k = 0;
 		sprintf_s(temp, "%d", i);
@@ -38,10 +38,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		handle = _findfirst(inPath.c_str(), &fileinfo);
 		if (handle == -1)
 			return -1;
+		int count = 0;
 		do
 		{
 			//找到的文件的文件名
-			std::string imgname = "D:/实习/seg/TrainImages/";
+			std::string imgname = "D:/实习/seg/TrainImagesGray/";
 			imgname = imgname + temp + "/" + fileinfo.name;
 			src = imread(imgname, 0);
 			if (src.empty())
@@ -68,8 +69,9 @@ int _tmain(int argc, _TCHAR* argv[])
 					labels[i*imagesSum + k][j] = 0;
 			}
 			k++;
+			++count;
 
-		} while (!_findnext(handle, &fileinfo));
+		} while ((!_findnext(handle, &fileinfo))&&(count<116));
 		Mat labelsMat(classSum*imagesSum, classSum, CV_32FC1, labels);
 
 		_findclose(handle);
@@ -82,7 +84,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	////==========================训练部分==============================////
 	std::cout << "创建模型" << std::endl;
 	Ptr<ANN_MLP>model = ANN_MLP::create();
-	//Ptr<ANN_MLP> model = StatModel::load<ANN_MLP>("../bpcharModel.xml");
+	//Ptr<ANN_MLP> model = StatModel::load<ANN_MLP>("../ann.xml");
 	Mat layerSizes = (Mat_<int>(1, 3) << imageRows*imageCols, imageRows*imageCols*2, classSum);
 	model->setLayerSizes(layerSizes);
 	model->setTrainMethod(ANN_MLP::BACKPROP, 0.001, 0.1);
@@ -92,7 +94,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	Ptr<TrainData> trainData = TrainData::create(trainingDataMat, ROW_SAMPLE, labelsMat);
 	std::cout << "开始训练" << std::endl;
 	model->train(trainData);
-	model->save("../bpcharModel.xml"); //save classifier
+	model->save("../ann.xml"); //save classifier
 	std::cout << "训练完成" << std::endl;
 	return 0;
 }
