@@ -9,12 +9,23 @@ using namespace ml;
 MyImgProc::MyImgProc(){}
 MyImgProc::~MyImgProc(){}
 
-//增强图像中的高频区域（边缘和角点），移植自halcon emphasize函数。实现效果与halcon的区别较大
+//增强图像中的高频区域（边缘和角点），移植自halcon emphasize函数。
 void MyImgProc::Emphasize(const Mat &src, Mat &dst, int maskwidth, int maskheight, float factor)
 {
 	blur(src, dst, Size(maskwidth, maskheight));
-	subtract(src, dst, dst);
-	scaleAdd(dst, factor, src, dst);
+	Mat_<int> isrc = src, idst = dst;
+	subtract(isrc, idst, idst);
+	scaleAdd(idst, factor, isrc, idst);
+
+	for (int w = 0; w < 490; w++)
+		for (int h = 0; h < 656; h++)
+		{
+			if (idst[w][h] < 0)
+				idst[w][h] = 0;
+			else if (idst[w][h] > 255)
+				idst[w][h] = 255;
+		}
+	idst.convertTo(dst, CV_8U);
 }
 
 //形态学操作
